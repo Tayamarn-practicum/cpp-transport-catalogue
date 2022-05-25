@@ -59,6 +59,10 @@ namespace transport_catalogue {
         return true_dist;
     }
 
+    size_t StopPointerPairHasher::operator()(const std::pair<Stop*, Stop*>& obj) const {
+        return std::hash<void*>{}(obj.first) + 37 * std::hash<void*>{}(obj.second);
+    }
+
     TransportCatalogue::TransportCatalogue() {}
 
     void TransportCatalogue::AddStop(const Stop& stop) {

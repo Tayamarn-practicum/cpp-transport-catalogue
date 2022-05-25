@@ -8,14 +8,14 @@
 
 #include "transport_catalogue.h"
 
-// Comment this out because practicum's platform doesn't support custom files...
+// Comment this out because practicum's platform doesn't support custom files.
 // #include "log_duration.h"
 
 namespace detail {
     // We have these functions here, because Yandex practicum doesn't support custom files.
     // Ideally they should be in a separate file.
 
-    std::vector<std::string> SplitString(std::string str, char delimiter) {
+    std::vector<std::string> SplitString(const std::string& str, char delimiter) {
         std::stringstream ss(str);
         std::string segment;
         std::vector<std::string> seglist;
@@ -114,13 +114,13 @@ namespace input_reader {
         tc.AddBus({name, stops, tc});
     }
 
-    void ReadInput(TransportCatalogue& tc) {
+    void ReadInput(std::istream& stream, TransportCatalogue& tc) {
         int num_requests = 0;
-        std::cin >> num_requests;
+        stream >> num_requests;
         std::vector<std::string> requests;
         std::string request;
         for (;num_requests >= 0;--num_requests) {
-            std::getline(std::cin, request);
+            std::getline(stream, request);
             requests.push_back(request);
         }
 

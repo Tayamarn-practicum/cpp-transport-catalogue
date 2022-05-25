@@ -16,12 +16,12 @@ int main() {
 
     {
         // LOG_DURATION("Input");
-        input_reader::ReadInput(tc);
+        input_reader::ReadInput(std::cin, tc);
     }
 
     {
         // LOG_DURATION("Stat");
-        stat_reader::ReadStat(tc);
+        stat_reader::ReadStat(std::cin, std::cout, tc);
     }
     // std::cout << "OK!" << std::endl;
 }

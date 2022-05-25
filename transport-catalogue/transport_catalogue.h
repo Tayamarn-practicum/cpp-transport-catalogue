@@ -39,9 +39,7 @@ namespace transport_catalogue {
 
     class StopPointerPairHasher {
     public:
-        size_t operator()(const std::pair<Stop*, Stop*>& obj) const {
-            return std::hash<void*>{}(obj.first) + 37 * std::hash<void*>{}(obj.second);
-        }
+        size_t operator()(const std::pair<Stop*, Stop*>& obj) const;
     };
 
     class TransportCatalogue {

@@ -7,7 +7,7 @@
 namespace detail {
     // We have these functions here, because Yandex practicum doesn't support custom files.
 
-    std::vector<std::string> SplitString(std::string str, char delimiter);
+    std::vector<std::string> SplitString(const std::string& str, char delimiter);
 
     // trim from start (in place)
     void ltrim(std::string &s);
@@ -26,5 +26,5 @@ namespace input_reader {
 
     void AddBus(std::string& request, transport_catalogue::TransportCatalogue& tc);
 
-    void ReadInput(transport_catalogue::TransportCatalogue& tc);
+    void ReadInput(std::istream& stream, transport_catalogue::TransportCatalogue& tc);
 }
