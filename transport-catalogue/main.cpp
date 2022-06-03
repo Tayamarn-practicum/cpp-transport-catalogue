@@ -10,7 +10,7 @@
 
 int main() {
     tests::RunTests();
-    // std::cout << "Tests OK!" << std::endl;
+    std::cerr << "Tests OK!" << std::endl;
 
     transport_catalogue::TransportCatalogue tc;
 
@@ -23,5 +23,5 @@ int main() {
         // LOG_DURATION("Stat");
         stat_reader::ReadStat(std::cin, std::cout, tc);
     }
-    // std::cout << "OK!" << std::endl;
+    std::cerr << "OK!" << std::endl;
 }
