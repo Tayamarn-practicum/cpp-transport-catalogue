@@ -1,0 +1,3 @@
+namespace transport_catalogue {
+
+}

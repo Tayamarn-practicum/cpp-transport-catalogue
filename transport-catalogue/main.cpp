@@ -5,11 +5,11 @@
 #include "stat_reader.h"
 
 // Comment these out because practicum's platform doesn't support custom files.
-// #include "tests.h"
+#include "tests.h"
 // #include "log_duration.h"
 
 int main() {
-    // tests::RunTests();
+    tests::RunTests();
     // std::cout << "Tests OK!" << std::endl;
 
     transport_catalogue::TransportCatalogue tc;

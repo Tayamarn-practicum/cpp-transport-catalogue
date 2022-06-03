@@ -33,7 +33,8 @@ namespace tests {
         tc.AddStop(s2);
         std::string bus_name = "Bus1";
         std::vector<Stop*> stops {tc.StopByName("Test1"), tc.StopByName("Test2")};
-        Bus b {bus_name, stops, tc};
+        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
+        Bus b {bus_name, stops, tc.GetDists()};
         tc.AddBus(b);
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
@@ -65,6 +66,7 @@ namespace tests {
         Stop s2 {stop_name2, 14.2, 77.2};
         tc.AddStop(s1);
         tc.AddStop(s2);
+        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
 
         std::string req = "Bus Bus1: Test1 > Test2";
         input_reader::AddBus(req, tc);
@@ -86,6 +88,7 @@ namespace tests {
         Stop s2 {stop_name2, 14.2, 77.2};
         tc.AddStop(s1);
         tc.AddStop(s2);
+        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
 
         std::string req = "Bus Bus1: Test1 - Test2";
         input_reader::AddBus(req, tc);

@@ -11,7 +11,9 @@ namespace transport_catalogue {
         coords({lat, lng})
     {}
 
-    Bus::Bus(std::string& name, std::vector<Stop*>& stops, TransportCatalogue& tc) :
+    Bus::Bus(std::string& name,
+             std::vector<Stop*>& stops,
+             std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists) :
         name(name),
         stops(stops)
     {
@@ -19,7 +21,7 @@ namespace transport_catalogue {
         std::set<Stop*> us(stops.begin(), stops.end());
         unique_stops = move(us);
         // We are calculating distances here, because probably input operations will be more frequent, then stat operations.
-        true_dist = CalculateTrueDistance(tc);
+        true_dist = CalculateTrueDistance(dists);
         geo_dist = CalculateGeoDistance();
     }
 
@@ -32,10 +34,10 @@ namespace transport_catalogue {
         return res;
     }
 
-    double Bus::CalculateTrueDistance(TransportCatalogue& tc) {
+    double Bus::CalculateTrueDistance(std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists) {
         // LOG_DURATION("CalculateTrueDistance");
         double res = 0;
-        auto dists = tc.GetDists();
+        // auto dists = tc.GetDists();
         for (int i=0; i < stops.size() - 1; ++i) {
             auto itr = dists->find({stops[i], stops[i+1]});
             if (itr != dists->end()) {

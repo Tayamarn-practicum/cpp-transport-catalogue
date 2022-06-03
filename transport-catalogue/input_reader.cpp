@@ -111,7 +111,8 @@ namespace input_reader {
             }
         }
 
-        tc.AddBus({name, stops, tc});
+        auto dists = tc.GetDists();
+        tc.AddBus({name, stops, tc.GetDists()});
     }
 
     void ReadInput(std::istream& stream, TransportCatalogue& tc) {
