@@ -25,8 +25,13 @@ namespace stat_reader {
             return;
         }
         Bus* bus = busname_to_bus.at(bus_name);
-        _ostream << std::setprecision(6)
-                 << "Bus " << bus_name <<": "
+        // _ostream << std::setprecision(6)
+        //          << "Bus " << bus_name <<": "
+        //          << bus->stops.size() << " stops on route, "
+        //          << bus->unique_stops.size() << " unique stops, "
+        //          << bus->GetTrueDistance() <<" route length, "
+        //          << bus->GetCurvature() << " curvature" << std::endl;
+        _ostream << "Bus " << bus_name <<": "
                  << bus->stops.size() << " stops on route, "
                  << bus->unique_stops.size() << " unique stops, "
                  << bus->GetTrueDistance() <<" route length, "

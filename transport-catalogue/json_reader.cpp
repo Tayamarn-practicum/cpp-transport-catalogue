@@ -84,7 +84,7 @@ namespace json_reader {
         resp["request_id"] = request.at("id").AsInt();
         if (request.at("type").AsString() == "Stop") {
             ProcessStopRequest(request, resp, handler);
-        } else {
+        } else if (request.at("type").AsString() == "Bus") {
             ProcessBusRequest(request, resp, handler);
         }
         return resp;
