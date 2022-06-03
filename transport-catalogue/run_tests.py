@@ -1,4 +1,5 @@
 import difflib
+import json
 import subprocess
 
 
@@ -13,26 +14,35 @@ def main():
     print('------------')
     print()
 
-    with open('test_in.txt', 'r') as fin:
-        with open('test_out.txt', 'w') as fout:
+    with open('test_input.json', 'r') as fin:
+        with open('test_output.json', 'w') as fout:
             s = subprocess.run('main.exe', stdin=fin, stdout=fout)
     print('Run STDERR:')
     print(s.stderr)
     print('------------')
     print()
 
-    print('DIFF:')
-    with open('test_out_example.txt') as file_1:
-        file_1_text = file_1.readlines()
+    # print('DIFF:')
+    # with open('test_out_example.txt') as file_1:
+    #     file_1_text = file_1.readlines()
 
-    with open('test_out.txt') as file_2:
-        file_2_text = file_2.readlines()
+    # with open('test_out.txt') as file_2:
+    #     file_2_text = file_2.readlines()
 
-    # Find and print the diff:
-    for line in difflib.unified_diff(
-            file_1_text, file_2_text, fromfile='test_out_example.txt',
-            tofile='test_out.txt', lineterm=''):
-        print(line)
+    # # Find and print the diff:
+    # for line in difflib.unified_diff(
+    #         file_1_text, file_2_text, fromfile='test_out_example.txt',
+    #         tofile='test_out.txt', lineterm=''):
+    #     print(line)
+
+    with open('test_out_example.json', 'r') as f:
+        j1 = json.load(f)
+    with open('test_output.json', 'r') as f:
+        j2 = json.load(f)
+    if (j1 == j2):
+        print('OK!')
+    else:
+        print('Something is wrong')
 
 
 if __name__ == '__main__':

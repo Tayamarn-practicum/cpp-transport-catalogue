@@ -23,15 +23,15 @@ namespace transport_catalogue {
 
         std::deque<Stop> GetStops();
 
-        std::map<std::string_view, Stop*> GetStopnames();
+        std::map<std::string_view, Stop*> GetStopnames() const;
 
         Stop* StopByName(const std::string& stop_name);
 
         std::deque<Bus> GetBuses();
 
-        std::map<std::string_view, Bus*> GetBusnames();
+        std::map<std::string_view, Bus*> GetBusnames() const;
 
-        std::unordered_set<Bus*> GetBusesByStop(Stop* stop);
+        const std::unordered_set<Bus*>* GetBusesByStop(Stop* stop) const;
 
         std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* GetDists();
 

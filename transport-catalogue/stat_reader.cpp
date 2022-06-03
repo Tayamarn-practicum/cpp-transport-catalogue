@@ -43,13 +43,13 @@ namespace stat_reader {
             return;
         }
         Stop* stop = stopname_to_stop.at(stop_name);
-        std::unordered_set<Bus*> buses = tc.GetBusesByStop(stop);
-        if (buses.size() == 0) {
+        const std::unordered_set<Bus*>* buses = tc.GetBusesByStop(stop);
+        if (buses->size() == 0) {
             _ostream << "Stop " << stop_name << ": no buses" << std::endl;
             return;
         }
         std::vector<std::string> bus_names;
-        for (Bus* b : buses) {
+        for (Bus* b : *buses) {
             bus_names.push_back(b->name);
         }
         std::sort(bus_names.begin(), bus_names.end());

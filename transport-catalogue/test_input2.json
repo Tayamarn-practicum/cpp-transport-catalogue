@@ -1,0 +1,12 @@
+{
+"base_requests":
+[{
+"type": "Stop", "name": "A", "latitude": 0.01, "longitude": 0.02, "road_distances": {"B": 10000}}, {
+"type": "Stop", "name": "B", "latitude": 0.01, "longitude": 0.03, "road_distances": {}}, {
+"type": "Bus", "name": "Bus", "stops": ["A", "B"], "is_roundtrip": false
+}],
+"stat_requests":
+[{
+"id": 1, "type": "Bus", "name": "Bus"
+}]
+}

@@ -29,11 +29,12 @@ void AssertEqualImpl(const T& t, const U& u, const std::string& t_str, const std
 template <typename T, typename U>
 void AssertApproxEqualImpl(const T& t, const U& u, const std::string& t_str, const std::string& u_str, const std::string& file,
                      const std::string& func, unsigned line, const std::string& hint) {
-    const double EPSILON = 1e-6;
+    const double EPSILON = 1e-5;
     if (std::fabs(t - u) > EPSILON) {
+        std::cout << std::fabs(t - u) << "     " << EPSILON << std::endl;
         std::cout << std::boolalpha;
         std::cout << file << static_cast<std::string>("(") << line << static_cast<std::string>("): ") << func << static_cast<std::string>(": ");
-        std::cout << static_cast<std::string>("ASSERT_EQUAL(") << t_str << static_cast<std::string>(", ") << u_str << static_cast<std::string>(") failed: ");
+        std::cout << static_cast<std::string>("ASSERT_APPOX_EQUAL(") << t_str << static_cast<std::string>(", ") << u_str << static_cast<std::string>(") failed: ");
         std::cout << t << static_cast<std::string>(" != ") << u << static_cast<std::string>(".");
         if (!hint.empty()) {
             std::cout << static_cast<std::string>(" Hint: ") << hint;
@@ -80,6 +81,8 @@ namespace tests {
     void TCAddBus();
 
     void InputAddStop();
+
+    void InputAddDist();
 
     void InputAddBusOneWay();
 

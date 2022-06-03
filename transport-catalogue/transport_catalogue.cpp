@@ -32,7 +32,7 @@ namespace transport_catalogue {
         return stops_;
     }
 
-    std::map<std::string_view, Stop*> TransportCatalogue::GetStopnames() {
+    std::map<std::string_view, Stop*> TransportCatalogue::GetStopnames() const {
         return stopname_to_stop_;
     }
 
@@ -44,12 +44,13 @@ namespace transport_catalogue {
         return buses_;
     }
 
-    std::map<std::string_view, Bus*> TransportCatalogue::GetBusnames() {
+    std::map<std::string_view, Bus*> TransportCatalogue::GetBusnames() const {
         return busname_to_bus_;
     }
 
-    std::unordered_set<Bus*> TransportCatalogue::GetBusesByStop(Stop* stop) {
-        return stop_to_buses_.at(stop);
+    const std::unordered_set<Bus*>* TransportCatalogue::GetBusesByStop(Stop* stop) const {
+        auto iter = stop_to_buses_.find(stop);
+        return iter != stop_to_buses_.end() ? &iter->second : nullptr;
     }
 
     std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* TransportCatalogue::GetDists() {

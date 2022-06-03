@@ -1,9 +1,11 @@
 #include "tests.h"
 
 #include <vector>
+#include <sstream>
 
 #include "geo.h"
-#include "input_reader.h"
+// #include "input_reader.h"
+#include "json_reader.h"
 #include "transport_catalogue.h"
 
 namespace tests {
@@ -47,13 +49,33 @@ namespace tests {
         TransportCatalogue tc;
         ASSERT(tc.GetStops().empty());
         ASSERT(tc.GetStopnames().empty());
-        std::string req = "Stop Tolstopaltsevo: 55.611087, 37.208290";
-        input_reader::AddStop(req, tc);
+        std::istringstream stream{R"({"type": "Stop","name": "Ривьерский мост","latitude": 43.587795,"longitude": 39.716901,"road_distances": {"Морской вокзал": 850}})"};
+        const auto doc = json::Load(stream);
+        json_reader::AddStop(doc.GetRoot().AsMap(), tc);
         ASSERT_EQUAL(tc.GetStops().size(), 1);
-        ASSERT_EQUAL(tc.GetStops()[0].name, "Tolstopaltsevo");
-        ASSERT_EQUAL(tc.GetStopnames()["Tolstopaltsevo"]->name, "Tolstopaltsevo");
-        ASSERT_APPOX_EQUAL(tc.GetStopnames()["Tolstopaltsevo"]->coords.lat, 55.611087);
-        ASSERT_APPOX_EQUAL(tc.GetStopnames()["Tolstopaltsevo"]->coords.lng, 37.208290);
+        ASSERT_EQUAL(tc.GetStops()[0].name, "Ривьерский мост");
+        ASSERT_EQUAL(tc.GetStopnames()["Ривьерский мост"]->name, "Ривьерский мост");
+        ASSERT_APPOX_EQUAL(tc.GetStopnames()["Ривьерский мост"]->coords.lat, 43.587795);
+        ASSERT_APPOX_EQUAL(tc.GetStopnames()["Ривьерский мост"]->coords.lng, 39.716901);
+    }
+
+    void InputAddDist() {
+        TransportCatalogue tc;
+        ASSERT(tc.GetBuses().empty());
+        ASSERT(tc.GetBusnames().empty());
+        ASSERT(tc.GetDists()->empty());
+        std::string stop_name1 = "Test1";
+        std::string stop_name2 = "Test2";
+        Stop s1 {stop_name1, 12.2, 76.8};
+        Stop s2 {stop_name2, 14.2, 77.2};
+        tc.AddStop(s1);
+        tc.AddStop(s2);
+
+        std::istringstream stream{R"({"type": "Stop","name": "Test1","latitude": 43.587795,"longitude": 39.716901,"road_distances": {"Test2": 850}})"};
+        const auto doc = json::Load(stream);
+        json_reader::AddDist(doc.GetRoot().AsMap(), tc);
+
+        ASSERT_EQUAL(tc.GetDists()->size(), 1);
     }
 
     void InputAddBusOneWay() {
@@ -62,20 +84,24 @@ namespace tests {
         ASSERT(tc.GetBusnames().empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.2, 76.8};
-        Stop s2 {stop_name2, 14.2, 77.2};
+        Stop s1 {stop_name1, 12.201, 76.801};
+        Stop s2 {stop_name2, 12.202, 76.802};
         tc.AddStop(s1);
         tc.AddStop(s2);
-        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
+        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 200);
 
-        std::string req = "Bus Bus1: Test1 > Test2";
-        input_reader::AddBus(req, tc);
+        std::istringstream stream{R"({"type": "Bus","name": "Bus1","stops":["Test1", "Test2", "Test1"],"is_roundtrip": true})"};
+        const auto doc = json::Load(stream);
+        json_reader::AddBus(doc.GetRoot().AsMap(), tc);
+
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->name, "Bus1");
-        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops.size(), 2);
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops.size(), 3);
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[0]->name, "Test1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[1]->name, "Test2");
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[2]->name, "Test1");
+        ASSERT_APPOX_EQUAL(tc.GetBusnames()["Bus1"]->GetCurvature(), 1.28628);
     }
 
     void InputAddBusTwoWay() {
@@ -84,14 +110,16 @@ namespace tests {
         ASSERT(tc.GetBusnames().empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.2, 76.8};
-        Stop s2 {stop_name2, 14.2, 77.2};
+        Stop s1 {stop_name1, 12.201, 76.801};
+        Stop s2 {stop_name2, 12.202, 76.802};
         tc.AddStop(s1);
         tc.AddStop(s2);
-        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
+        tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 200);
 
-        std::string req = "Bus Bus1: Test1 - Test2";
-        input_reader::AddBus(req, tc);
+        std::istringstream stream{R"({"type": "Bus","name": "Bus1","stops":["Test1", "Test2"],"is_roundtrip": false})"};
+        const auto doc = json::Load(stream);
+        json_reader::AddBus(doc.GetRoot().AsMap(), tc);
+
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->name, "Bus1");
@@ -99,12 +127,14 @@ namespace tests {
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[0]->name, "Test1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[1]->name, "Test2");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[2]->name, "Test1");
+        ASSERT_APPOX_EQUAL(tc.GetBusnames()["Bus1"]->GetCurvature(), 1.28628);
     }
 
     void RunTests() {
         RUN_TEST(TCAddStop);
         RUN_TEST(TCAddBus);
         RUN_TEST(InputAddStop);
+        RUN_TEST(InputAddDist);
         RUN_TEST(InputAddBusOneWay);
         RUN_TEST(InputAddBusTwoWay);
     }

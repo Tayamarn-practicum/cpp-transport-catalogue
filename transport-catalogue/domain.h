@@ -10,7 +10,7 @@
 namespace transport_catalogue {
     struct Stop {
         std::string name;
-        Coordinates coords;
+        geo::Coordinates coords;
 
         Stop(std::string& name, double lat, double lng);
     };

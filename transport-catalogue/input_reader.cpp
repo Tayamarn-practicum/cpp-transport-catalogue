@@ -111,7 +111,7 @@ namespace input_reader {
             }
         }
 
-        auto dists = tc.GetDists();
+        // auto dists = tc.GetDists();
         tc.AddBus({name, stops, tc.GetDists()});
     }
 
