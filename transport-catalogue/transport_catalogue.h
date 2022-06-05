@@ -2,7 +2,6 @@
 
 #include <deque>
 #include <map>
-#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -21,15 +20,23 @@ namespace transport_catalogue {
 
         void AddDistance(Stop* s1, Stop* s2, int dist);
 
-        std::deque<Stop> GetStops();
+        std::deque<Stop> GetStops() const;
+
+        std::deque<Stop>* GetStopsPtr();
 
         std::map<std::string_view, Stop*> GetStopnames() const;
 
-        Stop* StopByName(const std::string& stop_name);
+        std::map<std::string_view, Stop*>* GetStopnamesPtr();
 
-        std::deque<Bus> GetBuses();
+        Stop* StopByName(const std::string& stop_name) const;
+
+        std::deque<Bus> GetBuses() const;
+
+        std::deque<Bus>* GetBusesPtr();
 
         std::map<std::string_view, Bus*> GetBusnames() const;
+
+        std::map<std::string_view, Bus*>* GetBusnamesPtr();
 
         const std::unordered_set<Bus*>* GetBusesByStop(Stop* stop) const;
 

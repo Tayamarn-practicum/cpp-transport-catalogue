@@ -28,24 +28,40 @@ namespace transport_catalogue {
         dist_between_stops_[{s1, s2}] = dist;
     }
 
-    std::deque<Stop> TransportCatalogue::GetStops() {
+    std::deque<Stop> TransportCatalogue::GetStops() const {
         return stops_;
+    }
+
+    std::deque<Stop>* TransportCatalogue::GetStopsPtr() {
+        return &stops_;
     }
 
     std::map<std::string_view, Stop*> TransportCatalogue::GetStopnames() const {
         return stopname_to_stop_;
     }
 
-    Stop* TransportCatalogue::StopByName(const std::string& stop_name) {
+    std::map<std::string_view, Stop*>* TransportCatalogue::GetStopnamesPtr() {
+        return &stopname_to_stop_;
+    }
+
+    Stop* TransportCatalogue::StopByName(const std::string& stop_name) const {
         return stopname_to_stop_.at(stop_name);
     }
 
-    std::deque<Bus> TransportCatalogue::GetBuses() {
+    std::deque<Bus> TransportCatalogue::GetBuses() const {
         return buses_;
+    }
+
+    std::deque<Bus>* TransportCatalogue::GetBusesPtr() {
+        return &buses_;
     }
 
     std::map<std::string_view, Bus*> TransportCatalogue::GetBusnames() const {
         return busname_to_bus_;
+    }
+
+    std::map<std::string_view, Bus*>* TransportCatalogue::GetBusnamesPtr() {
+        return &busname_to_bus_;
     }
 
     const std::unordered_set<Bus*>* TransportCatalogue::GetBusesByStop(Stop* stop) const {

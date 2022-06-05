@@ -27,7 +27,7 @@ namespace transport_catalogue {
     double Bus::CalculateGeoDistance() {
         // LOG_DURATION("CalculateGeoDistance");
         double res = 0;
-        for (int i=0; i < stops.size() - 1; ++i) {
+        for (size_t i=0; i < stops.size() - 1; ++i) {
             res += ComputeDistance(stops[i]->coords, stops[i+1]->coords);
         }
         return res;
@@ -37,7 +37,7 @@ namespace transport_catalogue {
         // LOG_DURATION("CalculateTrueDistance");
         double res = 0;
         // auto dists = tc.GetDists();
-        for (int i=0; i < stops.size() - 1; ++i) {
+        for (size_t i=0; i < stops.size() - 1; ++i) {
             auto itr = dists->find({stops[i], stops[i+1]});
             if (itr != dists->end()) {
                 res += itr->second;

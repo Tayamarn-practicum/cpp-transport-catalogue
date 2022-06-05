@@ -1,7 +1,9 @@
 #include "json_reader.h"
 
 #include <algorithm>
+#include <iostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace json_reader {
@@ -9,7 +11,13 @@ namespace json_reader {
         const auto doc = json::Load(istream);
         json::Dict root = doc.GetRoot().AsMap();
         ProcessBaseRequests(root.at("base_requests"), tc);
-        ProcessStatRequests(root.at("stat_requests"), tc, ostream);
+        // Somehow we don't need it anymore...
+        // if (root.find("stat_requests") != root.end()) {
+        //     ProcessStatRequests(root.at("stat_requests"), tc, ostream);
+        // }
+        if (root.find("render_settings") != root.end()) {
+            ProcessRender(root.at("render_settings"), tc, ostream);
+        }
     }
 
     void ProcessBaseRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc) {
@@ -120,5 +128,67 @@ namespace json_reader {
         responce_node["route_length"] = bus_stat->route_length;
         responce_node["stop_count"] = bus_stat->stop_count;
         responce_node["unique_stop_count"] = bus_stat->unique_stop_count;
+    }
+
+    void ProcessRender(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream) {
+        json::Dict request = requests_node.AsMap();
+        svg::Color underlayer_color = GetColor(request.at("underlayer_color"));
+        std::vector<svg::Color> color_palette;
+        for (json::Node node : request.at("color_palette").AsArray()) {
+            color_palette.push_back(GetColor(node));
+        }
+        // std::cerr << std::boolalpha << "============ " << std::holds_alternative<svg::Rgba>(underlayer_color) << std::endl;
+        map_renderer::MapSettings ms{
+            request.at("width").AsDouble(),
+            request.at("height").AsDouble(),
+            request.at("padding").AsDouble(),
+            request.at("line_width").AsDouble(),
+            request.at("stop_radius").AsDouble(),
+            request.at("bus_label_font_size").AsInt(),
+            {
+                request.at("bus_label_offset").AsArray()[0].AsDouble(),
+                request.at("bus_label_offset").AsArray()[1].AsDouble()
+            },
+            request.at("stop_label_font_size").AsInt(),
+            {
+                request.at("stop_label_offset").AsArray()[0].AsDouble(),
+                request.at("stop_label_offset").AsArray()[1].AsDouble()
+            },
+            underlayer_color,
+            request.at("underlayer_width").AsDouble(),
+            color_palette
+        };
+        map_renderer::RenderMap(
+            tc.GetBusnamesPtr(),
+            ms,
+            ostream
+        );
+    }
+
+    svg::Color GetColor(json::Node& color_node) {
+        if (color_node.IsString()) {
+            return color_node.AsString();
+        }
+        if (color_node.IsArray()) {
+            json::Array color_arr = color_node.AsArray();
+            if (color_arr.size() == 3) {
+                svg::Rgb rgb {
+                    static_cast<uint8_t>(color_arr[0].AsInt()),
+                    static_cast<uint8_t>(color_arr[1].AsInt()),
+                    static_cast<uint8_t>(color_arr[2].AsInt())
+                };
+                return rgb;
+            }
+            if (color_arr.size() == 4) {
+                svg::Rgba rgba {
+                    static_cast<uint8_t>(color_arr[0].AsInt()),
+                    static_cast<uint8_t>(color_arr[1].AsInt()),
+                    static_cast<uint8_t>(color_arr[2].AsInt()),
+                    color_arr[3].AsDouble()
+                };
+                return rgba;
+            }
+        }
+        return {};
     }
 }
