@@ -14,8 +14,8 @@ def main():
     print('------------')
     print()
 
-    with open('test_input.json', 'r') as fin:
-        with open('test_output.svg', 'w') as fout:
+    with open('test_input2.json', 'r') as fin:
+        with open('test_output2.svg', 'w') as fout:
             s = subprocess.run('main.exe', stdin=fin, stdout=fout)
     print('Run STDERR:')
     print(s.stderr)
