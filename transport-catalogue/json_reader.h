@@ -5,8 +5,8 @@
 #include "json.h"
 #include "map_renderer.h"
 #include "request_handler.h"
-#include "svg.h"
 #include "transport_catalogue.h"
+#include "svg.h"
 
 namespace json_reader {
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc);

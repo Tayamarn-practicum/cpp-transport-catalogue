@@ -162,7 +162,7 @@ namespace json_reader {
         };
         map_renderer::RenderMap(
             tc.GetBusnamesPtr(),
-            tc.GetStopnamesPtr(),
+            tc.GetBusnamesPtr(),
             ms,
             ostream
         );

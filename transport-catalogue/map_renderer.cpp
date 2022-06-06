@@ -134,7 +134,7 @@ namespace map_renderer {
                 settings.bus_label_font_size,
                 true
             );
-            if (!bus->is_roundtrip) {
+            if ((!bus->is_roundtrip) && (bus->first != bus->last)) {
                 AddTextWithBackground(
                     settings,
                     doc,
