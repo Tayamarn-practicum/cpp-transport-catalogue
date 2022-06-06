@@ -6,6 +6,15 @@ namespace svg {
 
     using namespace std::literals;
 
+    Point::Point(double x, double y) :
+        x(x),
+        y(y)
+    {}
+    Point::Point(std::pair<double, double> coord) :
+        x(coord.first),
+        y(coord.second)
+    {}
+
     std::ostream& operator<<(std::ostream& out, const Rgb rgb) {
         out << "rgb(" << static_cast<int>(rgb.red) << ","
                       << static_cast<int>(rgb.green) << ","

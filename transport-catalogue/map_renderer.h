@@ -112,7 +112,52 @@ namespace map_renderer {
 
     void RenderMap(
         std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        std::map<std::string_view, transport_catalogue::Stop*>* stops,
         MapSettings& settings,
         std::ostream& ostream
+    );
+
+    void AddLines(
+        std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        MapSettings& settings,
+        svg::Document& doc,
+        std::vector<std::string_view>& bus_names,
+        const SphereProjector& proj
+    );
+
+    void AddLineTexts(
+        std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        MapSettings& settings,
+        svg::Document& doc,
+        std::vector<std::string_view>& bus_names,
+        const SphereProjector& proj
+    );
+
+    void AddTextWithBackground(
+        MapSettings& settings,
+        svg::Document& doc,
+        const SphereProjector& proj,
+        geo::Coordinates& coords,
+        std::pair<double, double> offset,
+        std::string& data,
+        svg::Color& text_color,
+        int font_size,
+        bool is_bold
+    );
+
+    void AddStops(
+        std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        MapSettings& settings,
+        svg::Document& doc,
+        std::vector<std::string_view>& stop_names,
+        const SphereProjector& proj
+    );
+
+    void AddStopNames(
+        std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        MapSettings& settings,
+        svg::Document& doc,
+        std::vector<std::string_view>& stop_names,
+        const SphereProjector& proj
     );
 }

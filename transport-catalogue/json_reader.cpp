@@ -67,13 +67,15 @@ namespace json_reader {
         for (auto stop_name : stop_names) {
             stops.push_back(tc.StopByName(stop_name.AsString()));
         }
+        transport_catalogue::Stop* first = stops[0];
+        transport_catalogue::Stop* last = stops[stops.size() - 1];
 
         if (!bus.at("is_roundtrip").AsBool()) {
             for (int i=stop_names.size()-2;i>=0;--i) {
                 stops.push_back(tc.StopByName(stop_names[i].AsString()));
             }
         }
-        tc.AddBus({name, stops, tc.GetDists()});
+        tc.AddBus({name, stops, tc.GetDists(), bus.at("is_roundtrip").AsBool(), first, last});
     }
 
     void ProcessStatRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream) {
@@ -160,6 +162,7 @@ namespace json_reader {
         };
         map_renderer::RenderMap(
             tc.GetBusnamesPtr(),
+            tc.GetStopnamesPtr(),
             ms,
             ostream
         );

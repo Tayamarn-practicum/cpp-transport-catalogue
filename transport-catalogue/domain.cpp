@@ -12,9 +12,14 @@ namespace transport_catalogue {
 
     Bus::Bus(std::string& name,
              std::vector<Stop*>& stops,
-             std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists) :
+             std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists,
+             bool is_roundtrip,
+             Stop* first, Stop* last) :
         name(name),
-        stops(stops)
+        stops(stops),
+        is_roundtrip(is_roundtrip),
+        first(first),
+        last(last)
     {
         // LOG_DURATION("BusCreation");
         std::unordered_set<Stop*> us(stops.begin(), stops.end());

@@ -68,10 +68,8 @@ namespace svg {
 
     struct Point {
         Point() = default;
-        Point(double x, double y)
-            : x(x)
-            , y(y) {
-        }
+        Point(double x, double y);
+        Point(std::pair<double, double> coord);
         double x = 0;
         double y = 0;
     };

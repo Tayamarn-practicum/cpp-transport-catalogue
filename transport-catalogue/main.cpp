@@ -13,6 +13,7 @@ int main() {
     tests::RunTests();
     std::cerr << "Tests OK!" << std::endl;
 
+    // LOG_DURATION("Test");
     transport_catalogue::TransportCatalogue tc;
     json_reader::ProcessInput(std::cin, std::cout, tc);
 

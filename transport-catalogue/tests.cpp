@@ -36,13 +36,16 @@ namespace tests {
         std::string bus_name = "Bus1";
         std::vector<Stop*> stops {tc.StopByName("Test1"), tc.StopByName("Test2")};
         tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 25);
-        Bus b {bus_name, stops, tc.GetDists()};
+        Bus b {bus_name, stops, tc.GetDists(), true, tc.StopByName("Test1"), tc.StopByName("Test2")};
         tc.AddBus(b);
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->name, "Bus1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[0]->name, "Test1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[1]->name, "Test2");
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->first->name, "Test1");
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->last->name, "Test2");
+        ASSERT(tc.GetBusnames()["Bus1"]->is_roundtrip);
     }
 
     void InputAddStop() {
@@ -102,6 +105,9 @@ namespace tests {
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[1]->name, "Test2");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[2]->name, "Test1");
         ASSERT_APPOX_EQUAL(tc.GetBusnames()["Bus1"]->GetCurvature(), 1.28628);
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->first->name, "Test1");
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->last->name, "Test1");
+        ASSERT(tc.GetBusnames()["Bus1"]->is_roundtrip);
     }
 
     void InputAddBusTwoWay() {
@@ -128,6 +134,9 @@ namespace tests {
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[1]->name, "Test2");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->stops[2]->name, "Test1");
         ASSERT_APPOX_EQUAL(tc.GetBusnames()["Bus1"]->GetCurvature(), 1.28628);
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->first->name, "Test1");
+        ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->last->name, "Test2");
+        ASSERT(!tc.GetBusnames()["Bus1"]->is_roundtrip);
     }
 
     void RunTests() {

@@ -32,7 +32,10 @@ namespace transport_catalogue {
 
         Bus(std::string& name,
             std::vector<Stop*>& stops,
-            std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists);
+            std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists,
+            bool is_roundtrip,
+            Stop* first, Stop* last
+        );
 
         double CalculateGeoDistance();
         double CalculateTrueDistance(std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists);
