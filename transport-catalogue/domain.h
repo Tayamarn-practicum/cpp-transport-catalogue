@@ -26,6 +26,9 @@ namespace transport_catalogue {
         std::unordered_set<Stop*> unique_stops;
         double true_dist;
         double geo_dist;
+        bool is_roundtrip;
+        Stop* first;
+        Stop* last;
 
         Bus(std::string& name,
             std::vector<Stop*>& stops,
