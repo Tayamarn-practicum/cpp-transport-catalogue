@@ -1,6 +1,5 @@
 #include "map_renderer.h"
 
-#include <algorithm>
 #include <unordered_set>
 
 #include <iostream>
@@ -72,6 +71,22 @@ namespace map_renderer {
         return {x, y};
     }
 
+    bool IsZero(double value) {
+        return std::abs(value) < EPSILON;
+    }
+
+    // Проецирует широту и долготу в координаты внутри SVG-изображения
+    svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
+        return {
+            (coords.lng - min_lon_) * zoom_coeff_ + padding_,
+            (max_lat_ - coords.lat) * zoom_coeff_ + padding_
+        };
+    }
+
+    double SphereProjector::GetCoef() const {
+        return zoom_coeff_;
+    }
+
     void RenderMap(
         std::map<std::string_view, transport_catalogue::Bus*>* buses,
         MapSettings& settings,
@@ -86,12 +101,22 @@ namespace map_renderer {
         std::sort(bus_names.begin(), bus_names.end());
 
         ZoomCoefProcessor zoom_coef_proc {settings, stops_in_routes};
+        std::vector<geo::Coordinates> geo_coords;
+        for (transport_catalogue::Stop* stop : stops_in_routes) {
+            geo_coords.push_back(stop->coords);
+        }
+        const SphereProjector proj{
+            geo_coords.begin(), geo_coords.end(), settings.width, settings.height, settings.padding
+        };
+        std::cerr << "!!! ZoomCoefProcessor: " << zoom_coef_proc.GetCoef() << std::endl;
+        std::cerr << "!!! SphereProjector: " << proj.GetCoef() << std::endl;
 
         svg::Document doc;
         for (size_t i=0; i<bus_names.size();++i) {
             int color_num = i % settings.color_palette.size();
             svg::Color bus_color = settings.color_palette[color_num];
             transport_catalogue::Bus* bus = buses->at(bus_names[i]);
+
             svg::Polyline poly;
             poly.SetStrokeColor(bus_color)
                 .SetStrokeWidth(settings.line_width)
@@ -99,7 +124,14 @@ namespace map_renderer {
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             for (transport_catalogue::Stop* stop : bus->stops) {
-                poly.AddPoint(zoom_coef_proc.CoordsToPoint(stop->coords));
+                auto point = zoom_coef_proc.CoordsToPoint(stop->coords);
+                std::cerr << "++ " << stop->coords.lat << ", " << stop->coords.lng << " -> " << point.x << ", " << point.y << std::endl;
+                // poly.AddPoint(zoom_coef_proc.CoordsToPoint(stop->coords));
+            }
+            for (transport_catalogue::Stop* stop : bus->stops) {
+                auto point = proj(stop->coords);
+                std::cerr << "-- " << stop->coords.lat << ", " << stop->coords.lng << " -> " << point.x << ", " << point.y << std::endl;
+                poly.AddPoint(proj(stop->coords));
             }
             doc.Add(poly);
         }

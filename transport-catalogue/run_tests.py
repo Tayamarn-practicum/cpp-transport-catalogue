@@ -14,8 +14,8 @@ def main():
     print('------------')
     print()
 
-    with open('test_input2.json', 'r') as fin:
-        with open('test_output2.svg', 'w') as fout:
+    with open('test_input3.json', 'r') as fin:
+        with open('test_output.svg', 'w') as fout:
             s = subprocess.run('main.exe', stdin=fin, stdout=fout)
     print('Run STDERR:')
     print(s.stderr)
@@ -23,7 +23,7 @@ def main():
     print()
 
     print('DIFF:')
-    with open('test_out_example.svg') as file_1:
+    with open('test_out_example3.svg') as file_1:
         file_1_text = file_1.readlines()
 
     with open('test_output.svg') as file_2:
@@ -31,8 +31,8 @@ def main():
 
     # Find and print the diff:
     for line in difflib.unified_diff(
-            file_1_text, file_2_text, fromfile='test_out_example.svg',
-            tofile='test_out.svg', lineterm=''):
+            file_1_text, file_2_text, fromfile='test_out_example3.svg',
+            tofile='test_output.svg', lineterm=''):
         print(line)
 
     # with open('test_out_example.json', 'r') as f:
