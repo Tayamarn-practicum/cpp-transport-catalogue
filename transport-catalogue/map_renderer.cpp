@@ -33,44 +33,6 @@ namespace map_renderer {
             color_palette(color_palette)
         {}
 
-    ZoomCoefProcessor::ZoomCoefProcessor(MapSettings& settings, std::unordered_set<transport_catalogue::Stop*>& stops_in_routes) :
-        padding_(settings.padding)
-    {
-        min_lat_ = std::numeric_limits<double>::infinity();
-        min_lng_ = std::numeric_limits<double>::infinity();
-        max_lat_ = std::numeric_limits<double>::lowest();
-        max_lng_ = std::numeric_limits<double>::lowest();
-        for (auto stop : stops_in_routes) {
-            if (stop->coords.lat > max_lat_) max_lat_ = stop->coords.lat;
-            if (stop->coords.lat < min_lat_) min_lat_ = stop->coords.lat;
-            if (stop->coords.lng > max_lng_) max_lng_ = stop->coords.lng;
-            if (stop->coords.lng < min_lng_) min_lng_ = stop->coords.lng;
-        }
-        if ((max_lng_ == min_lng_) && (max_lat_ == min_lat_)) {
-            coef_ = 0;
-            return;
-        }
-        double width_zoom_coef = std::numeric_limits<double>::infinity();
-        double height_zoom_coef = std::numeric_limits<double>::infinity();
-        if (max_lng_ != min_lng_) {
-            width_zoom_coef = (settings.width - 2 * settings.padding) / (max_lng_ - min_lng_);
-        }
-        if (max_lat_ == min_lat_) {
-            height_zoom_coef = (settings.height - 2 * settings.padding) / (max_lat_ - min_lat_);
-        }
-        coef_ = std::min(width_zoom_coef, height_zoom_coef);
-    }
-
-    double ZoomCoefProcessor::GetCoef() const {
-        return coef_;
-    }
-
-    svg::Point ZoomCoefProcessor::CoordsToPoint(geo::Coordinates coords) const {
-        double x = (coords.lng - min_lng_) * coef_ + padding_;
-        double y = (max_lat_ - coords.lat) * coef_ + padding_;
-        return {x, y};
-    }
-
     bool IsZero(double value) {
         return std::abs(value) < EPSILON;
     }
@@ -100,7 +62,6 @@ namespace map_renderer {
         }
         std::sort(bus_names.begin(), bus_names.end());
 
-        ZoomCoefProcessor zoom_coef_proc {settings, stops_in_routes};
         std::vector<geo::Coordinates> geo_coords;
         for (transport_catalogue::Stop* stop : stops_in_routes) {
             geo_coords.push_back(stop->coords);
@@ -108,8 +69,6 @@ namespace map_renderer {
         const SphereProjector proj{
             geo_coords.begin(), geo_coords.end(), settings.width, settings.height, settings.padding
         };
-        std::cerr << "!!! ZoomCoefProcessor: " << zoom_coef_proc.GetCoef() << std::endl;
-        std::cerr << "!!! SphereProjector: " << proj.GetCoef() << std::endl;
 
         svg::Document doc;
         for (size_t i=0; i<bus_names.size();++i) {
@@ -124,13 +83,6 @@ namespace map_renderer {
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             for (transport_catalogue::Stop* stop : bus->stops) {
-                auto point = zoom_coef_proc.CoordsToPoint(stop->coords);
-                std::cerr << "++ " << stop->coords.lat << ", " << stop->coords.lng << " -> " << point.x << ", " << point.y << std::endl;
-                // poly.AddPoint(zoom_coef_proc.CoordsToPoint(stop->coords));
-            }
-            for (transport_catalogue::Stop* stop : bus->stops) {
-                auto point = proj(stop->coords);
-                std::cerr << "-- " << stop->coords.lat << ", " << stop->coords.lng << " -> " << point.x << ", " << point.y << std::endl;
                 poly.AddPoint(proj(stop->coords));
             }
             doc.Add(poly);

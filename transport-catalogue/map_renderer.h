@@ -42,26 +42,7 @@ namespace map_renderer {
         std::vector<svg::Color> color_palette;
     };
 
-    class ZoomCoefProcessor {
-    public:
-        ZoomCoefProcessor(MapSettings& settings, std::unordered_set<transport_catalogue::Stop*>& stops_in_routes);
-
-        double GetCoef() const;
-
-        svg::Point CoordsToPoint(geo::Coordinates coords) const;
-    private:
-        double min_lat_;
-        double min_lng_;
-        double max_lat_;
-        double max_lng_;
-        double coef_;
-        double padding_;
-    };
-
     inline const double EPSILON = 1e-6;
-    // bool IsZero(double value) {
-    //     return std::abs(value) < EPSILON;
-    // }
 
     bool IsZero(double value);
 
@@ -116,14 +97,6 @@ namespace map_renderer {
                 zoom_coeff_ = *height_zoom;
             }
         }
-
-        // // Проецирует широту и долготу в координаты внутри SVG-изображения
-        // svg::Point operator()(geo::Coordinates coords) const {
-        //     return {
-        //         (coords.lng - min_lon_) * zoom_coeff_ + padding_,
-        //         (max_lat_ - coords.lat) * zoom_coeff_ + padding_
-        //     };
-        // }
 
         // Проецирует широту и долготу в координаты внутри SVG-изображения
         svg::Point operator()(geo::Coordinates coords) const;
