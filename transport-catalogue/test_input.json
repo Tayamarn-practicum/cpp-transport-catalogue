@@ -3,22 +3,22 @@
       {
         "type": "Bus",
         "name": "114",
-        "stops": ["Морской вокзал", "Ривьерский мост"],
+        "stops": ["Mor port", "Rivyera bridge"],
         "is_roundtrip": false
       },
       {
         "type": "Stop",
-        "name": "Ривьерский мост",
+        "name": "Rivyera bridge",
         "latitude": 43.587795,
         "longitude": 39.716901,
-        "road_distances": {"Морской вокзал": 850}
+        "road_distances": {"Mor port": 850}
       },
       {
         "type": "Stop",
-        "name": "Морской вокзал",
+        "name": "Mor port",
         "latitude": 43.581969,
         "longitude": 39.719848,
-        "road_distances": {"Ривьерский мост": 850}
+        "road_distances": {"Rivyera bridge": 850}
       }
     ],
     "render_settings": {
@@ -37,7 +37,7 @@
     },
     "stat_requests": [
       { "id": 1, "type": "Map" },
-      { "id": 2, "type": "Stop", "name": "Ривьерский мост" },
+      { "id": 2, "type": "Stop", "name": "Rivyera bridge" },
       { "id": 3, "type": "Bus", "name": "114" }
     ]
   }

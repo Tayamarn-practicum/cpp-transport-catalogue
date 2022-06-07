@@ -11,13 +11,8 @@ namespace json_reader {
         const auto doc = json::Load(istream);
         json::Dict root = doc.GetRoot().AsMap();
         ProcessBaseRequests(root.at("base_requests"), tc);
-        // Somehow we don't need it anymore...
-        // if (root.find("stat_requests") != root.end()) {
-        //     ProcessStatRequests(root.at("stat_requests"), tc, ostream);
-        // }
-        if (root.find("render_settings") != root.end()) {
-            ProcessRender(root.at("render_settings"), tc, ostream);
-        }
+        auto settings = ProcessRender(root.at("render_settings"));
+        ProcessStatRequests(root.at("stat_requests"), tc, settings, ostream);
     }
 
     void ProcessBaseRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc) {
@@ -78,10 +73,15 @@ namespace json_reader {
         tc.AddBus({name, stops, tc.GetDists(), bus.at("is_roundtrip").AsBool(), first, last});
     }
 
-    void ProcessStatRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream) {
+    void ProcessStatRequests(
+        json::Node& requests_node,
+        transport_catalogue::TransportCatalogue& tc,
+        map_renderer::MapSettings& settings,
+        std::ostream& ostream
+    ) {
         json::Array requests = requests_node.AsArray();
         json::Array responces;
-        request_handler::RequestHandler handler(tc);
+        request_handler::RequestHandler handler(tc, settings);
         for (auto req : requests) {
             responces.push_back(ProcessStatRequest(req, handler));
         }
@@ -96,6 +96,8 @@ namespace json_reader {
             ProcessStopRequest(request, resp, handler);
         } else if (request.at("type").AsString() == "Bus") {
             ProcessBusRequest(request, resp, handler);
+        } else if (request.at("type").AsString() == "Map") {
+            ProcessMapRequest(resp, handler);
         }
         return resp;
     }
@@ -132,15 +134,18 @@ namespace json_reader {
         responce_node["unique_stop_count"] = bus_stat->unique_stop_count;
     }
 
-    void ProcessRender(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream) {
+    void ProcessMapRequest(json::Dict& responce_node, request_handler::RequestHandler& handler) {
+        responce_node["map"] = handler.RenderMap();
+    }
+
+    map_renderer::MapSettings ProcessRender(json::Node& requests_node) {
         json::Dict request = requests_node.AsMap();
         svg::Color underlayer_color = GetColor(request.at("underlayer_color"));
         std::vector<svg::Color> color_palette;
         for (json::Node node : request.at("color_palette").AsArray()) {
             color_palette.push_back(GetColor(node));
         }
-        // std::cerr << std::boolalpha << "============ " << std::holds_alternative<svg::Rgba>(underlayer_color) << std::endl;
-        map_renderer::MapSettings ms{
+        map_renderer::MapSettings settings{
             request.at("width").AsDouble(),
             request.at("height").AsDouble(),
             request.at("padding").AsDouble(),
@@ -160,12 +165,7 @@ namespace json_reader {
             request.at("underlayer_width").AsDouble(),
             color_palette
         };
-        map_renderer::RenderMap(
-            tc.GetBusnamesPtr(),
-            tc.GetBusnamesPtr(),
-            ms,
-            ostream
-        );
+        return settings;
     }
 
     svg::Color GetColor(json::Node& color_node) {

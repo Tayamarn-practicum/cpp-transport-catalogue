@@ -83,53 +83,63 @@ def main():
     print('------------')
     print()
 
+    # with open('s10_final_opentest_3.json', 'r') as fin:
     with open('test_input.json', 'r') as fin:
-        with open('test_output.svg', 'w') as fout:
+        with open('test_output.json', 'w') as fout:
             s = subprocess.run('main.exe', stdin=fin, stdout=fout)
     print('Run STDERR:')
     print(s.stderr)
     print('------------')
     print()
 
-    # print('DIFF:')
-    # with open('test_out_example.svg') as file_1:
-    #     file_1_text = file_1.readlines()
 
-    # with open('test_output.svg') as file_2:
-    #     file_2_text = file_2.readlines()
+
+    print('DIFF:')
+    with open('test_out_example.json') as file_1:
+    # with open('s10_final_opentest_3_answer.json') as file_1:
+        file_1_text = file_1.read()
+
+    with open('test_output.json') as file_2:
+        file_2_text = file_2.read()
+
+    json1 = json.loads(file_1_text)
+    json2 = json.loads(file_2_text)
+    assert len(json1) == len(json2), 'Length do not match'
+    for i in range(len(json1)):
+        assert json1[i]['request_id'] == json2[i]['request_id'], f'Req id do not match {json1[i]["request_id"]} != {json2[i]["request_id"]}'
+        if 'map' in json1[i]:
+            tree1 = XmlTree.convert_string_to_tree(json1[i]['map'])
+            tree2 = XmlTree.convert_string_to_tree(json2[i]['map'])
+            comparator = XmlTree()
+            if comparator.xml_compare(tree1, tree2, []):
+                print("XMLs match")
+            else:
+                print(f"XMLs don't match in map {json1[i]['request_id']}")
+        else:
+            assert json1[i] == json2[i], f'Problem in req id {json1[i]["request_id"]}'
 
     # # Find and print the diff:
     # for line in difflib.unified_diff(
-    #         file_1_text, file_2_text, fromfile='test_out_example3.svg',
+    #         file_1_text, file_2_text, fromfile='test_out_example.svg',
     #         tofile='test_output.svg', lineterm=''):
     #     print(line)
 
-    print('DIFF:')
-    with open('test_out_example.svg') as file_1:
-        file_1_text = file_1.read()
+    # print('DIFF:')
+    # with open('test_out_example.svg') as file_1:
+    #     file_1_text = file_1.read()
 
-    with open('test_output.svg') as file_2:
-        file_2_text = file_2.read()
+    # with open('test_output.svg') as file_2:
+    #     file_2_text = file_2.read()
 
-    tree1 = XmlTree.convert_string_to_tree(file_1_text)
-    tree2 = XmlTree.convert_string_to_tree(file_2_text)
+    # tree1 = XmlTree.convert_string_to_tree(file_1_text)
+    # tree2 = XmlTree.convert_string_to_tree(file_2_text)
 
-    comparator = XmlTree()
+    # comparator = XmlTree()
 
-    if comparator.xml_compare(tree1, tree2, []):
-        print("XMLs match")
-    else:
-        print("XMLs don't match")
-
-
-    # with open('test_out_example.json', 'r') as f:
-    #     j1 = json.load(f)
-    # with open('test_output.json', 'r') as f:
-    #     j2 = json.load(f)
-    # if (j1 == j2):
-    #     print('OK!')
+    # if comparator.xml_compare(tree1, tree2, []):
+    #     print("XMLs match")
     # else:
-    #     print('Something is wrong')
+    #     print("XMLs don't match")
 
 
 if __name__ == '__main__':

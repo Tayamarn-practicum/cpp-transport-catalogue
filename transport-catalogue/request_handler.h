@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "map_renderer.h"
 #include "transport_catalogue.h"
 
 namespace request_handler {
@@ -22,22 +23,18 @@ namespace request_handler {
 
     class RequestHandler {
     public:
-        // MapRenderer понадобится в следующей части итогового проекта
-        // RequestHandler(const TransportCatalogue& db, const renderer::MapRenderer& renderer);
-        RequestHandler(const transport_catalogue::TransportCatalogue& db);
+        RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapSettings& settings);
 
-        // // Возвращает информацию о маршруте (запрос Bus)
+        // Возвращает информацию о маршруте (запрос Bus)
         std::optional<BusStat> GetBusStat(const std::string_view& bus_name) const;
 
         // Возвращает маршруты, проходящие через остановку
         const std::unordered_set<transport_catalogue::Bus*>* GetBusesByStop(const std::string_view& stop_name) const;
 
-        // Этот метод будет нужен в следующей части итогового проекта
-        // svg::Document RenderMap() const;
+        std::string RenderMap() const;
 
     private:
-        // RequestHandler использует агрегацию объектов "Транспортный Справочник" и "Визуализатор Карты"
         const transport_catalogue::TransportCatalogue& db_;
-        // const renderer::MapRenderer& renderer_;
+        const map_renderer::MapSettings& map_settings_;
     };
 }

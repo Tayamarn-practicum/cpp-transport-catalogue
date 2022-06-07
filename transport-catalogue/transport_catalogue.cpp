@@ -40,7 +40,7 @@ namespace transport_catalogue {
         return stopname_to_stop_;
     }
 
-    std::map<std::string_view, Stop*>* TransportCatalogue::GetStopnamesPtr() {
+    const std::map<std::string_view, Stop*>* TransportCatalogue::GetStopnamesPtr() const {
         return &stopname_to_stop_;
     }
 
@@ -60,7 +60,7 @@ namespace transport_catalogue {
         return busname_to_bus_;
     }
 
-    std::map<std::string_view, Bus*>* TransportCatalogue::GetBusnamesPtr() {
+    const std::map<std::string_view, Bus*>* TransportCatalogue::GetBusnamesPtr() const {
         return &busname_to_bus_;
     }
 

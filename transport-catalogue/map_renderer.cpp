@@ -50,9 +50,9 @@ namespace map_renderer {
     }
 
     void RenderMap(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         std::ostream& ostream
     ) {
         std::vector<std::string_view> bus_names;
@@ -60,7 +60,9 @@ namespace map_renderer {
         std::unordered_set<transport_catalogue::Stop*> stops_in_routes;
         for (auto [name, bus] : *buses) {
             bus_names.push_back(name);
-            stops_in_routes.merge(bus->unique_stops);
+            auto stops_for_bus = bus->unique_stops;
+            stops_in_routes.merge(stops_for_bus);
+            // stops_in_routes.merge(bus->unique_stops);
         }
         std::sort(bus_names.begin(), bus_names.end());
         for (auto stop : stops_in_routes) {
@@ -87,8 +89,8 @@ namespace map_renderer {
     }
 
     void AddLines(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
@@ -112,8 +114,8 @@ namespace map_renderer {
     }
 
     void AddLineTexts(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
@@ -151,7 +153,7 @@ namespace map_renderer {
     }
 
     void AddTextWithBackground(
-        MapSettings& settings,
+        const MapSettings& settings,
         svg::Document& doc,
         const SphereProjector& proj,
         geo::Coordinates& coords,
@@ -183,8 +185,8 @@ namespace map_renderer {
     }
 
     void AddStops(
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj
@@ -200,8 +202,8 @@ namespace map_renderer {
     }
 
     void AddStopNames(
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj

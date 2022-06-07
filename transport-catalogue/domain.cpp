@@ -21,7 +21,6 @@ namespace transport_catalogue {
         first(first),
         last(last)
     {
-        // LOG_DURATION("BusCreation");
         std::unordered_set<Stop*> us(stops.begin(), stops.end());
         unique_stops = move(us);
         // We are calculating distances here, because probably input operations will be more frequent, then stat operations.
@@ -30,7 +29,6 @@ namespace transport_catalogue {
     }
 
     double Bus::CalculateGeoDistance() {
-        // LOG_DURATION("CalculateGeoDistance");
         double res = 0;
         for (size_t i=0; i < stops.size() - 1; ++i) {
             res += ComputeDistance(stops[i]->coords, stops[i+1]->coords);
@@ -39,9 +37,7 @@ namespace transport_catalogue {
     }
 
     double Bus::CalculateTrueDistance(std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* dists) {
-        // LOG_DURATION("CalculateTrueDistance");
         double res = 0;
-        // auto dists = tc.GetDists();
         for (size_t i=0; i < stops.size() - 1; ++i) {
             auto itr = dists->find({stops[i], stops[i+1]});
             if (itr != dists->end()) {

@@ -26,7 +26,7 @@ namespace transport_catalogue {
 
         std::map<std::string_view, Stop*> GetStopnames() const;
 
-        std::map<std::string_view, Stop*>* GetStopnamesPtr();
+        const std::map<std::string_view, Stop*>* GetStopnamesPtr() const;
 
         Stop* StopByName(const std::string& stop_name) const;
 
@@ -36,7 +36,7 @@ namespace transport_catalogue {
 
         std::map<std::string_view, Bus*> GetBusnames() const;
 
-        std::map<std::string_view, Bus*>* GetBusnamesPtr();
+        const std::map<std::string_view, Bus*>* GetBusnamesPtr() const;
 
         const std::unordered_set<Bus*>* GetBusesByStop(Stop* stop) const;
 

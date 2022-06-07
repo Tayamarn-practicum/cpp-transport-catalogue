@@ -111,30 +111,30 @@ namespace map_renderer {
     };
 
     void RenderMap(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         std::ostream& ostream
     );
 
     void AddLines(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
     );
 
     void AddLineTexts(
-        std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
     );
 
     void AddTextWithBackground(
-        MapSettings& settings,
+        const MapSettings& settings,
         svg::Document& doc,
         const SphereProjector& proj,
         geo::Coordinates& coords,
@@ -146,16 +146,16 @@ namespace map_renderer {
     );
 
     void AddStops(
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj
     );
 
     void AddStopNames(
-        std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        MapSettings& settings,
+        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj

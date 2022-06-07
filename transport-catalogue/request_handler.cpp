@@ -1,8 +1,6 @@
 #include "request_handler.h"
 
-// #include <iostream>
-// #include <Windows.h>
-// #include <cstdio>
+#include <sstream>
 
 
 namespace request_handler {
@@ -13,8 +11,9 @@ namespace request_handler {
         unique_stop_count(unique_stop_count)
     {}
 
-    RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db) :
-        db_(db)
+    RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapSettings& settings) :
+        db_(db),
+        map_settings_(settings)
     {}
 
     std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_name) const {
@@ -31,12 +30,22 @@ namespace request_handler {
     }
 
     const std::unordered_set<transport_catalogue::Bus*>* RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
-        // SetConsoleOutputCP(CP_UTF8);
         auto stopname_to_stop = db_.GetStopnames();
         if (stopname_to_stop.find(stop_name) == stopname_to_stop.end()) {
             return nullptr;
         }
         transport_catalogue::Stop* stop = stopname_to_stop.at(stop_name);
         return db_.GetBusesByStop(stop);
+    }
+
+    std::string RequestHandler::RenderMap() const {
+        std::ostringstream sstream;
+        map_renderer::RenderMap(
+            db_.GetBusnamesPtr(),
+            db_.GetStopnamesPtr(),
+            map_settings_,
+            sstream
+        );
+        return sstream.str();
     }
 }

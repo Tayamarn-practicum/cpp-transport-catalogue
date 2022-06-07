@@ -5,8 +5,8 @@
 #include "json.h"
 #include "map_renderer.h"
 #include "request_handler.h"
-#include "transport_catalogue.h"
 #include "svg.h"
+#include "transport_catalogue.h"
 
 namespace json_reader {
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc);
@@ -19,7 +19,12 @@ namespace json_reader {
 
     void AddBus(const json::Dict& bus, transport_catalogue::TransportCatalogue& tc);
 
-    void ProcessStatRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream);
+    void ProcessStatRequests(
+        json::Node& requests_node,
+        transport_catalogue::TransportCatalogue& tc,
+        map_renderer::MapSettings& settings,
+        std::ostream& ostream
+    );
 
     json::Node ProcessStatRequest(json::Node& request_node, request_handler::RequestHandler& handler);
 
@@ -27,7 +32,9 @@ namespace json_reader {
 
     void ProcessBusRequest(json::Dict& request_node, json::Dict& responce_node, request_handler::RequestHandler& handler);
 
-    void ProcessRender(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, std::ostream& ostream);
+    void ProcessMapRequest(json::Dict& responce_node, request_handler::RequestHandler& handler);
+
+    map_renderer::MapSettings ProcessRender(json::Node& requests_node);
 
     svg::Color GetColor(json::Node& color_node);
 }
