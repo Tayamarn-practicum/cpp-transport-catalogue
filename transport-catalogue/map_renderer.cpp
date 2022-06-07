@@ -49,12 +49,15 @@ namespace map_renderer {
         return zoom_coeff_;
     }
 
-    void RenderMap(
+    MapRenderer::MapRenderer(const MapSettings& settings) :
+        settings_(settings)
+    {}
+
+    void MapRenderer::Render(
         const std::map<std::string_view, transport_catalogue::Bus*>* buses,
         const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
         std::ostream& ostream
-    ) {
+    ) const {
         std::vector<std::string_view> bus_names;
         std::vector<std::string_view> stop_names;
         std::unordered_set<transport_catalogue::Stop*> stops_in_routes;
@@ -62,7 +65,6 @@ namespace map_renderer {
             bus_names.push_back(name);
             auto stops_for_bus = bus->unique_stops;
             stops_in_routes.merge(stops_for_bus);
-            // stops_in_routes.merge(bus->unique_stops);
         }
         std::sort(bus_names.begin(), bus_names.end());
         for (auto stop : stops_in_routes) {
@@ -76,33 +78,32 @@ namespace map_renderer {
             geo_coords.push_back(stop->coords);
         }
         const SphereProjector proj{
-            geo_coords.begin(), geo_coords.end(), settings.width, settings.height, settings.padding
+            geo_coords.begin(), geo_coords.end(), settings_.width, settings_.height, settings_.padding
         };
         svg::Document doc;
-        AddLines(buses, settings, doc, bus_names, proj);
-        AddLineTexts(buses, settings, doc, bus_names, proj);
+        AddLines(buses, doc, bus_names, proj);
+        AddLineTexts(buses, doc, bus_names, proj);
 
-        AddStops(stops, settings, doc, stop_names, proj);
-        AddStopNames(stops, settings, doc, stop_names, proj);
+        AddStops(stops, doc, stop_names, proj);
+        AddStopNames(stops, doc, stop_names, proj);
 
         doc.Render(ostream);
     }
 
-    void AddLines(
+    void MapRenderer::AddLines(
         const std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
-    ) {
+    ) const {
         for (size_t i=0; i<bus_names.size();++i) {
-            int color_num = i % settings.color_palette.size();
-            svg::Color bus_color = settings.color_palette[color_num];
+            int color_num = i % settings_.color_palette.size();
+            svg::Color bus_color = settings_.color_palette[color_num];
             transport_catalogue::Bus* bus = buses->at(bus_names[i]);
 
             svg::Polyline poly;
             poly.SetStrokeColor(bus_color)
-                .SetStrokeWidth(settings.line_width)
+                .SetStrokeWidth(settings_.line_width)
                 .SetFillColor("none")
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
@@ -113,47 +114,43 @@ namespace map_renderer {
         }
     }
 
-    void AddLineTexts(
+    void MapRenderer::AddLineTexts(
         const std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& bus_names,
         const SphereProjector& proj
-    ) {
+    ) const {
         for (size_t i=0; i<bus_names.size();++i) {
-            int color_num = i % settings.color_palette.size();
-            svg::Color bus_color = settings.color_palette[color_num];
+            int color_num = i % settings_.color_palette.size();
+            svg::Color bus_color = settings_.color_palette[color_num];
             transport_catalogue::Bus* bus = buses->at(bus_names[i]);
 
             AddTextWithBackground(
-                settings,
                 doc,
                 proj,
                 bus->first->coords,
-                settings.bus_label_offset,
+                settings_.bus_label_offset,
                 bus->name,
                 bus_color,
-                settings.bus_label_font_size,
+                settings_.bus_label_font_size,
                 true
             );
             if ((!bus->is_roundtrip) && (bus->first != bus->last)) {
                 AddTextWithBackground(
-                    settings,
                     doc,
                     proj,
                     bus->last->coords,
-                    settings.bus_label_offset,
+                    settings_.bus_label_offset,
                     bus->name,
                     bus_color,
-                    settings.bus_label_font_size,
+                    settings_.bus_label_font_size,
                     true
                 );
             }
         }
     }
 
-    void AddTextWithBackground(
-        const MapSettings& settings,
+    void MapRenderer::AddTextWithBackground(
         svg::Document& doc,
         const SphereProjector& proj,
         geo::Coordinates& coords,
@@ -162,7 +159,7 @@ namespace map_renderer {
         svg::Color& text_color,
         int font_size,
         bool is_bold
-    ) {
+    ) const {
         svg::Text text;
         text.SetPosition(proj(coords))
             .SetOffset(offset)
@@ -173,9 +170,9 @@ namespace map_renderer {
             text.SetFontWeight("bold");
         }
         svg::Text underlayer{text};
-        underlayer.SetFillColor(settings.underlayer_color)
-                  .SetStrokeColor(settings.underlayer_color)
-                  .SetStrokeWidth(settings.underlayer_width)
+        underlayer.SetFillColor(settings_.underlayer_color)
+                  .SetStrokeColor(settings_.underlayer_color)
+                  .SetStrokeWidth(settings_.underlayer_width)
                   .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                   .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
         text.SetFillColor(text_color);
@@ -184,42 +181,39 @@ namespace map_renderer {
         doc.Add(text);
     }
 
-    void AddStops(
+    void MapRenderer::AddStops(
         const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj
-    ) {
+    ) const {
         for (auto stop_name : stop_names) {
             transport_catalogue::Stop* stop = stops->at(stop_name);
             svg::Circle cir;
             cir.SetCenter(proj(stop->coords))
-               .SetRadius(settings.stop_radius)
+               .SetRadius(settings_.stop_radius)
                .SetFillColor("white");
             doc.Add(cir);
         }
     }
 
-    void AddStopNames(
+    void MapRenderer::AddStopNames(
         const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
         svg::Document& doc,
         std::vector<std::string_view>& stop_names,
         const SphereProjector& proj
-    ) {
+    ) const {
         for (auto stop_name : stop_names) {
             transport_catalogue::Stop* stop = stops->at(stop_name);
             svg::Color black {"black"};
             AddTextWithBackground(
-                settings,
                 doc,
                 proj,
                 stop->coords,
-                settings.stop_label_offset,
+                settings_.stop_label_offset,
                 stop->name,
                 black,
-                settings.stop_label_font_size,
+                settings_.stop_label_font_size,
                 false
             );
         }

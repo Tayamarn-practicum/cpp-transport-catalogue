@@ -81,7 +81,8 @@ namespace json_reader {
     ) {
         json::Array requests = requests_node.AsArray();
         json::Array responces;
-        request_handler::RequestHandler handler(tc, settings);
+        map_renderer::MapRenderer mr {settings};
+        request_handler::RequestHandler handler(tc, mr);
         for (auto req : requests) {
             responces.push_back(ProcessStatRequest(req, handler));
         }

@@ -11,9 +11,9 @@ namespace request_handler {
         unique_stop_count(unique_stop_count)
     {}
 
-    RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapSettings& settings) :
+    RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapRenderer& renderer) :
         db_(db),
-        map_settings_(settings)
+        map_renderer_(renderer)
     {}
 
     std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_name) const {
@@ -40,10 +40,9 @@ namespace request_handler {
 
     std::string RequestHandler::RenderMap() const {
         std::ostringstream sstream;
-        map_renderer::RenderMap(
+        map_renderer_.Render(
             db_.GetBusnamesPtr(),
             db_.GetStopnamesPtr(),
-            map_settings_,
             sstream
         );
         return sstream.str();

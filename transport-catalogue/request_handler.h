@@ -23,7 +23,7 @@ namespace request_handler {
 
     class RequestHandler {
     public:
-        RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapSettings& settings);
+        RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapRenderer& renderer);
 
         // Возвращает информацию о маршруте (запрос Bus)
         std::optional<BusStat> GetBusStat(const std::string_view& bus_name) const;
@@ -35,6 +35,6 @@ namespace request_handler {
 
     private:
         const transport_catalogue::TransportCatalogue& db_;
-        const map_renderer::MapSettings& map_settings_;
+        const map_renderer::MapRenderer& map_renderer_;
     };
 }

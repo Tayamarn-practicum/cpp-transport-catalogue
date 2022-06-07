@@ -110,54 +110,57 @@ namespace map_renderer {
         double zoom_coeff_ = 0;
     };
 
-    void RenderMap(
-        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
-        std::ostream& ostream
-    );
+    class MapRenderer {
+    public:
+        MapRenderer(const MapSettings& settings);
 
-    void AddLines(
-        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        const MapSettings& settings,
-        svg::Document& doc,
-        std::vector<std::string_view>& bus_names,
-        const SphereProjector& proj
-    );
+        void Render(
+            const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+            const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+            std::ostream& ostream
+        ) const;
 
-    void AddLineTexts(
-        const std::map<std::string_view, transport_catalogue::Bus*>* buses,
-        const MapSettings& settings,
-        svg::Document& doc,
-        std::vector<std::string_view>& bus_names,
-        const SphereProjector& proj
-    );
+    private:
+        const MapSettings& settings_;
 
-    void AddTextWithBackground(
-        const MapSettings& settings,
-        svg::Document& doc,
-        const SphereProjector& proj,
-        geo::Coordinates& coords,
-        std::pair<double, double> offset,
-        std::string& data,
-        svg::Color& text_color,
-        int font_size,
-        bool is_bold
-    );
+        void AddLines(
+            const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+            svg::Document& doc,
+            std::vector<std::string_view>& bus_names,
+            const SphereProjector& proj
+        ) const;
 
-    void AddStops(
-        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
-        svg::Document& doc,
-        std::vector<std::string_view>& stop_names,
-        const SphereProjector& proj
-    );
+        void AddLineTexts(
+            const std::map<std::string_view, transport_catalogue::Bus*>* buses,
+            svg::Document& doc,
+            std::vector<std::string_view>& bus_names,
+            const SphereProjector& proj
+        ) const;
 
-    void AddStopNames(
-        const std::map<std::string_view, transport_catalogue::Stop*>* stops,
-        const MapSettings& settings,
-        svg::Document& doc,
-        std::vector<std::string_view>& stop_names,
-        const SphereProjector& proj
-    );
+        void AddTextWithBackground(
+            svg::Document& doc,
+            const SphereProjector& proj,
+            geo::Coordinates& coords,
+            std::pair<double, double> offset,
+            std::string& data,
+            svg::Color& text_color,
+            int font_size,
+            bool is_bold
+        ) const;
+
+        void AddStops(
+            const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+            svg::Document& doc,
+            std::vector<std::string_view>& stop_names,
+            const SphereProjector& proj
+        ) const;
+
+        void AddStopNames(
+            const std::map<std::string_view, transport_catalogue::Stop*>* stops,
+            svg::Document& doc,
+            std::vector<std::string_view>& stop_names,
+            const SphereProjector& proj
+        ) const;
+
+    };
 }

@@ -241,6 +241,28 @@ namespace json {
 
     }  // namespace
 
+    Node::Node(std::nullptr_t val) :
+        value_(val)
+    {};
+    Node::Node(Array val) :
+        value_(val)
+    {};
+    Node::Node(Dict val) :
+        value_(val)
+    {};
+    Node::Node(bool val) :
+        value_(val)
+    {};
+    Node::Node(int val) :
+        value_(val)
+    {};
+    Node::Node(double val) :
+        value_(val)
+    {};
+    Node::Node(std::string val) :
+        value_(val)
+    {};
+
     const Array& Node::AsArray() const {
         if (!IsArray()) {
             throw std::logic_error("");

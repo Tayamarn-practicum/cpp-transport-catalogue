@@ -24,27 +24,13 @@ namespace json {
         using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
 
         Node() = default;
-        Node(std::nullptr_t val) :
-            value_(val)
-        {};
-        Node(Array val) :
-            value_(val)
-        {};
-        Node(Dict val) :
-            value_(val)
-        {};
-        Node(bool val) :
-            value_(val)
-        {};
-        Node(int val) :
-            value_(val)
-        {};
-        Node(double val) :
-            value_(val)
-        {};
-        Node(std::string val) :
-            value_(val)
-        {};
+        Node(std::nullptr_t val);
+        Node(Array val);
+        Node(Dict val);
+        Node(bool val);
+        Node(int val);
+        Node(double val);
+        Node(std::string val);
 
         bool IsNull() const;
         bool IsInt() const;
