@@ -80,19 +80,22 @@ namespace json_reader {
         std::ostream& ostream
     ) {
         json::Array requests = requests_node.AsArray();
-        json::Array responces;
+        json::Builder responces;
+        responces.StartArray();
         map_renderer::MapRenderer mr {settings};
         request_handler::RequestHandler handler(tc, mr);
         for (auto req : requests) {
-            responces.push_back(ProcessStatRequest(req, handler));
+            responces.Value(ProcessStatRequest(req, handler).GetValue());
         }
-        json::Print(json::Document{responces}, ostream);
+        responces.EndArray();
+        json::Print(json::Document{responces.Build()}, ostream);
     }
 
     json::Node ProcessStatRequest(json::Node& request_node, request_handler::RequestHandler& handler) {
         auto request = request_node.AsMap();
-        json::Dict resp;
-        resp["request_id"] = request.at("id").AsInt();
+        json::Builder resp;
+        resp.StartDict();
+        resp.Key(static_cast<std::string>("request_id")).Value(request.at("id").AsInt());
         if (request.at("type").AsString() == "Stop") {
             ProcessStopRequest(request, resp, handler);
         } else if (request.at("type").AsString() == "Bus") {
@@ -100,14 +103,14 @@ namespace json_reader {
         } else if (request.at("type").AsString() == "Map") {
             ProcessMapRequest(resp, handler);
         }
-        return resp;
+        resp.EndDict();
+        return resp.Build();
     }
 
-    void ProcessStopRequest(json::Dict& request_node, json::Dict& responce_node, request_handler::RequestHandler& handler) {
+    void ProcessStopRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler) {
         const std::unordered_set<transport_catalogue::Bus*>* buses = handler.GetBusesByStop(request_node.at("name").AsString());
         if (buses == nullptr) {
-            json::Node node{static_cast<std::string>("not found")};
-            responce_node["error_message"] = node;
+            responce_node.Key(static_cast<std::string>("error_message")).Value(static_cast<std::string>("not found"));
             return;
         }
         std::vector<std::string> bus_names;
@@ -115,28 +118,27 @@ namespace json_reader {
             bus_names.push_back(bus->name);
         }
         std::sort(bus_names.begin(), bus_names.end());
-        json::Array bus_nodes;
+        responce_node.Key(static_cast<std::string>("buses")).StartArray();
         for (auto bus : bus_names) {
-            bus_nodes.push_back(bus);
+            responce_node.Value(bus);
         }
-        responce_node["buses"] = bus_nodes;
+        responce_node.EndArray();
     }
 
-    void ProcessBusRequest(json::Dict& request_node, json::Dict& responce_node, request_handler::RequestHandler& handler) {
+    void ProcessBusRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler) {
         auto bus_stat = handler.GetBusStat(request_node.at("name").AsString());
         if (!bus_stat) {
-            json::Node node{static_cast<std::string>("not found")};
-            responce_node["error_message"] = node;
+            responce_node.Key(static_cast<std::string>("error_message")).Value(static_cast<std::string>("not found"));
             return;
         }
-        responce_node["curvature"] = bus_stat->curvature;
-        responce_node["route_length"] = bus_stat->route_length;
-        responce_node["stop_count"] = bus_stat->stop_count;
-        responce_node["unique_stop_count"] = bus_stat->unique_stop_count;
+        responce_node.Key(static_cast<std::string>("curvature")).Value(bus_stat->curvature);
+        responce_node.Key(static_cast<std::string>("route_length")).Value(bus_stat->route_length);
+        responce_node.Key(static_cast<std::string>("stop_count")).Value(bus_stat->stop_count);
+        responce_node.Key(static_cast<std::string>("unique_stop_count")).Value(bus_stat->unique_stop_count);
     }
 
-    void ProcessMapRequest(json::Dict& responce_node, request_handler::RequestHandler& handler) {
-        responce_node["map"] = handler.RenderMap();
+    void ProcessMapRequest(json::Builder& responce_node, request_handler::RequestHandler& handler) {
+        responce_node.Key(static_cast<std::string>("map")).Value(handler.RenderMap());
     }
 
     map_renderer::MapSettings ProcessRender(json::Node& requests_node) {

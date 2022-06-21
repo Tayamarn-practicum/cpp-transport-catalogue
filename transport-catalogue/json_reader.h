@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "json.h"
+#include "json_builder.h"
 #include "map_renderer.h"
 #include "request_handler.h"
 #include "svg.h"
@@ -28,11 +29,11 @@ namespace json_reader {
 
     json::Node ProcessStatRequest(json::Node& request_node, request_handler::RequestHandler& handler);
 
-    void ProcessStopRequest(json::Dict& request_node, json::Dict& responce_node, request_handler::RequestHandler& handler);
+    void ProcessStopRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler);
 
-    void ProcessBusRequest(json::Dict& request_node, json::Dict& responce_node, request_handler::RequestHandler& handler);
+    void ProcessBusRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler);
 
-    void ProcessMapRequest(json::Dict& responce_node, request_handler::RequestHandler& handler);
+    void ProcessMapRequest(json::Builder& responce_node, request_handler::RequestHandler& handler);
 
     map_renderer::MapSettings ProcessRender(json::Node& requests_node);
 
