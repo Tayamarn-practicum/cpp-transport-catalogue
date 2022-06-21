@@ -13,7 +13,7 @@ namespace json {
         return builder_;
     }
 
-    KeyContext GenericContext::Key(std::string key) {
+    KeyContext GenericContext::Key(const std::string& key) {
         return builder_->Key(std::move(key));
     }
 
@@ -57,7 +57,7 @@ namespace json {
         Context(con.GetBuilder())
     {}
 
-    KeyContext DictItemContext::Key(std::string key) {
+    KeyContext DictItemContext::Key(const std::string& key) {
         return builder_->Key(std::move(key));
     }
 
@@ -85,7 +85,7 @@ namespace json {
         return builder_->EndArray();
     }
 
-    KeyContext Builder::Key(std::string key) {
+    KeyContext Builder::Key(const std::string& key) {
         if (!started_) {
             throw std::logic_error("Not in Dict context.");
         }

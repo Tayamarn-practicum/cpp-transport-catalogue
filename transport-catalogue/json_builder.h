@@ -24,7 +24,7 @@ namespace json {
 
     class GenericContext : public Context {
     public:
-        KeyContext Key(std::string key);
+        KeyContext Key(const std::string& key);
         GenericContext Value(Node::Value val);
 
         DictItemContext StartDict();
@@ -47,7 +47,7 @@ namespace json {
     public:
         DictItemContext(Context con);
 
-        KeyContext Key(std::string key);
+        KeyContext Key(const std::string& key);
 
         GenericContext EndDict();
     };
@@ -66,7 +66,7 @@ namespace json {
     public:
         Builder() = default;
 
-        KeyContext Key(std::string key);
+        KeyContext Key(const std::string& key);
         GenericContext Value(Node::Value val);
 
         DictItemContext StartDict();

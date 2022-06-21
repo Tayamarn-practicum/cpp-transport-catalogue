@@ -3,10 +3,9 @@
 #include <iterator>
 
 namespace json {
+    using namespace std::literals;
 
     namespace {
-        using namespace std::literals;
-
         Node LoadNode(std::istream& input);
         Node LoadString(std::istream& input);
 
@@ -339,6 +338,120 @@ namespace json {
         }
 
     }  // namespace
+
+    bool Node::IsInt() const {
+        return std::holds_alternative<int>(*this);
+    }
+    int Node::AsInt() const {
+        if (!IsInt()) {
+            throw std::logic_error("Not an int"s);
+        }
+        return std::get<int>(*this);
+    }
+
+    bool Node::IsPureDouble() const {
+        return std::holds_alternative<double>(*this);
+    }
+    bool Node::IsDouble() const {
+        return IsInt() || IsPureDouble();
+    }
+    double Node::AsDouble() const {
+        if (!IsDouble()) {
+            throw std::logic_error("Not a double"s);
+        }
+        return IsPureDouble() ? std::get<double>(*this) : AsInt();
+    }
+
+    bool Node::IsBool() const {
+        return std::holds_alternative<bool>(*this);
+    }
+    bool Node::AsBool() const {
+        if (!IsBool()) {
+            throw std::logic_error("Not a bool"s);
+        }
+
+        return std::get<bool>(*this);
+    }
+
+    bool Node::IsNull() const {
+        return std::holds_alternative<std::nullptr_t>(*this);
+    }
+
+    bool Node::IsArray() const {
+        return std::holds_alternative<Array>(*this);
+    }
+    const Array& Node::AsArray() const {
+        if (!IsArray()) {
+            throw std::logic_error("Not an array"s);
+        }
+
+        return std::get<Array>(*this);
+    }
+
+    bool Node::IsString() const {
+        return std::holds_alternative<std::string>(*this);
+    }
+    const std::string& Node::AsString() const {
+        if (!IsString()) {
+            throw std::logic_error("Not a string"s);
+        }
+
+        return std::get<std::string>(*this);
+    }
+
+    bool Node::IsDict() const {
+        return std::holds_alternative<Dict>(*this);
+    }
+    const Dict& Node::AsDict() const {
+        if (!IsDict()) {
+            throw std::logic_error("Not a dict"s);
+        }
+
+        return std::get<Dict>(*this);
+    }
+
+    bool Node::IsMap() const {
+        return std::holds_alternative<Dict>(*this);
+    }
+    const Dict& Node::AsMap() const {
+        if (!IsDict()) {
+            throw std::logic_error("Not a dict"s);
+        }
+
+        return std::get<Dict>(*this);
+    }
+
+    bool Node::operator==(const Node& rhs) const {
+        return GetValue() == rhs.GetValue();
+    }
+
+    const Node::Value& Node::GetValue() const {
+        return *this;
+    }
+
+    Node::Value& Node::GetValue() {
+        return *this;
+    }
+
+    bool operator!=(const Node& lhs, const Node& rhs) {
+        return !(lhs == rhs);
+    }
+
+    Document::Document(Node root)
+        : root_(std::move(root))
+    {}
+
+    const Node& Document::GetRoot() const {
+        return root_;
+    }
+
+    bool operator==(const Document& lhs, const Document& rhs) {
+        return lhs.GetRoot() == rhs.GetRoot();
+    }
+
+    bool operator!=(const Document& lhs, const Document& rhs) {
+        return !(lhs == rhs);
+    }
 
     Document Load(std::istream& input) {
         return Document{LoadNode(input)};
