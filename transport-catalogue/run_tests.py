@@ -82,6 +82,8 @@ def main():
     print(s.stderr)
     print('------------')
     print()
+    if s.returncode != 0:
+        return
 
     # with open('s10_final_opentest_3.json', 'r') as fin:
     with open('test_input.json', 'r') as fin:

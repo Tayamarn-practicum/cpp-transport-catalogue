@@ -10,6 +10,11 @@
 #include "transport_catalogue.h"
 
 namespace json_reader {
+    struct RoutingSettings {
+        int bus_wait_time;
+        int bus_velocity;
+    };
+
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc);
 
     void ProcessBaseRequests(json::Node& requests, transport_catalogue::TransportCatalogue& tc);
@@ -36,6 +41,8 @@ namespace json_reader {
     void ProcessMapRequest(json::Builder& responce_node, request_handler::RequestHandler& handler);
 
     map_renderer::MapSettings ProcessRender(json::Node& requests_node);
+
+    RoutingSettings ProcessRouting(json::Node& requests_node);
 
     svg::Color GetColor(json::Node& color_node);
 }

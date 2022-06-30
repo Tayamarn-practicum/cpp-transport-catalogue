@@ -39,5 +39,9 @@
       { "id": 1, "type": "Map" },
       { "id": 2, "type": "Stop", "name": "Rivyera bridge" },
       { "id": 3, "type": "Bus", "name": "114" }
-    ]
+    ],
+    "routing_settings": {
+          "bus_wait_time": 6,
+          "bus_velocity": 40
+    }
   }

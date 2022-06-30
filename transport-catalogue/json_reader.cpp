@@ -6,13 +6,16 @@
 #include <variant>
 #include <vector>
 
+#include <iostream>
+
 namespace json_reader {
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc) {
         const auto doc = json::Load(istream);
         json::Dict root = doc.GetRoot().AsMap();
         ProcessBaseRequests(root.at("base_requests"), tc);
-        auto settings = ProcessRender(root.at("render_settings"));
-        ProcessStatRequests(root.at("stat_requests"), tc, settings, ostream);
+        auto map_settings = ProcessRender(root.at("render_settings"));
+        auto routing_settings = ProcessRouting(root.at("routing_settings"));
+        ProcessStatRequests(root.at("stat_requests"), tc, map_settings, ostream);
     }
 
     void ProcessBaseRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc) {
@@ -76,13 +79,13 @@ namespace json_reader {
     void ProcessStatRequests(
         json::Node& requests_node,
         transport_catalogue::TransportCatalogue& tc,
-        map_renderer::MapSettings& settings,
+        map_renderer::MapSettings& map_settings,
         std::ostream& ostream
     ) {
         json::Array requests = requests_node.AsArray();
         json::Builder responces;
         responces.StartArray();
-        map_renderer::MapRenderer mr {settings};
+        map_renderer::MapRenderer mr {map_settings};
         request_handler::RequestHandler handler(tc, mr);
         for (auto req : requests) {
             responces.Value(ProcessStatRequest(req, handler).GetValue());
@@ -169,6 +172,11 @@ namespace json_reader {
             color_palette
         };
         return settings;
+    }
+
+    RoutingSettings ProcessRouting(json::Node& requests_node) {
+        json::Dict request = requests_node.AsMap();
+        return {request.at("bus_wait_time").AsInt(), request.at("bus_velocity").AsInt()};
     }
 
     svg::Color GetColor(json::Node& color_node) {
