@@ -12,52 +12,65 @@ namespace json_reader {
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc) {
         const auto doc = json::Load(istream);
         json::Dict root = doc.GetRoot().AsMap();
-        ProcessBaseRequests(root.at("base_requests"), tc);
         auto map_settings = ProcessRender(root.at("render_settings"));
         auto routing_settings = ProcessRouting(root.at("routing_settings"));
+        ProcessBaseRequests(root.at("base_requests"), tc, routing_settings);
         ProcessStatRequests(root.at("stat_requests"), tc, map_settings, ostream);
     }
 
-    void ProcessBaseRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc) {
+    void ProcessBaseRequests(json::Node& requests_node, transport_catalogue::TransportCatalogue& tc, RoutingSettings& routing_settings) {
         json::Array requests = requests_node.AsArray();
+        size_t vertex_id = 0;
         for (auto req : requests) {
             auto map = req.AsMap();
             if (map.at("type").AsString() == "Stop") {
-                AddStop(map, tc);
+                AddStop(map, tc, vertex_id);
+                vertex_id += 2;
             }
         }
+
+        graph::DirectedWeightedGraph<double> directed_graph(vertex_id);
+
         for (auto req : requests) {
             auto map = req.AsMap();
             if (map.at("type").AsString() == "Stop") {
-                AddDist(map, tc);
+                AddDist(map, tc, directed_graph, routing_settings);
             }
         }
         for (auto req : requests) {
             auto map = req.AsMap();
             if (map.at("type").AsString() == "Bus") {
-                AddBus(map, tc);
+                AddBus(map, tc, directed_graph, routing_settings);
             }
         }
     }
 
-    void AddStop(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc) {
+    void AddStop(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc, size_t vertex_id) {
         std::string name = stop.at("name").AsString();
         tc.AddStop({name,
                     stop.at("latitude").AsDouble(),
-                    stop.at("longitude").AsDouble()});
+                    stop.at("longitude").AsDouble(),
+                    vertex_id});
     }
 
-    void AddDist(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc) {
+    void AddDist(const json::Dict& stop,
+                 transport_catalogue::TransportCatalogue& tc,
+                 graph::DirectedWeightedGraph<double>& directed_graph,
+                 RoutingSettings& routing_settings) {
         auto dists = stop.at("road_distances").AsMap();
         std::string name = stop.at("name").AsString();
         auto this_stop = tc.StopByName(name);
+        directed_graph.AddEdge({this_stop->in_vertex, this_stop->out_vertex, static_cast<double>(routing_settings.bus_wait_time)});
         for (auto [to_name, dist_node] : dists) {
             auto to_stop = tc.StopByName(to_name);
             tc.AddDistance(this_stop, to_stop, dist_node.AsInt());
         }
     }
 
-    void AddBus(const json::Dict& bus, transport_catalogue::TransportCatalogue& tc) {
+    void AddBus(const json::Dict& bus,
+                transport_catalogue::TransportCatalogue& tc,
+                graph::DirectedWeightedGraph<double>& directed_graph,
+                RoutingSettings& routing_settings) {
         std::string name = bus.at("name").AsString();
         std::vector<transport_catalogue::Stop*> stops;
 
@@ -74,6 +87,22 @@ namespace json_reader {
             }
         }
         tc.AddBus({name, stops, tc.GetDists(), bus.at("is_roundtrip").AsBool(), first, last});
+        for (auto slow_it = stops.begin(); slow_it != stops.end(); ++slow_it) {
+            int total_dist = 0;
+            for (auto fast_it = next(slow_it); fast_it != stops.end(); ++fast_it) {
+                auto itr = tc.GetDists()->find({*prev(fast_it), *fast_it});
+                if (itr != tc.GetDists()->end()) {
+                    total_dist += itr->second;
+                } else {
+                    total_dist += tc.GetDists()->at({*fast_it, *prev(fast_it)});
+                }
+                directed_graph.AddEdge({
+                    (*slow_it)->out_vertex,
+                    (*fast_it)->in_vertex,
+                    total_dist / routing_settings.bus_velocity
+                });
+            }
+        }
     }
 
     void ProcessStatRequests(
@@ -176,7 +205,10 @@ namespace json_reader {
 
     RoutingSettings ProcessRouting(json::Node& requests_node) {
         json::Dict request = requests_node.AsMap();
-        return {request.at("bus_wait_time").AsInt(), request.at("bus_velocity").AsInt()};
+        return {
+            request.at("bus_wait_time").AsInt(),
+            request.at("bus_velocity").AsDouble() / 60. // We want km per minute
+        };
     }
 
     svg::Color GetColor(json::Node& color_node) {

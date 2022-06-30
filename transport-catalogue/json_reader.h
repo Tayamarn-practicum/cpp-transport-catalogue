@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "graph.h"
 #include "json.h"
 #include "json_builder.h"
 #include "map_renderer.h"
@@ -12,18 +13,24 @@
 namespace json_reader {
     struct RoutingSettings {
         int bus_wait_time;
-        int bus_velocity;
+        double bus_velocity;
     };
 
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc);
 
-    void ProcessBaseRequests(json::Node& requests, transport_catalogue::TransportCatalogue& tc);
+    void ProcessBaseRequests(json::Node& requests, transport_catalogue::TransportCatalogue& tc, RoutingSettings& routing_settings);
 
-    void AddStop(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc);
+    void AddStop(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc, size_t vertex_id);
 
-    void AddDist(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc);
+    void AddDist(const json::Dict& stop,
+                 transport_catalogue::TransportCatalogue& tc,
+                 graph::DirectedWeightedGraph<double>& directed_graph,
+                 RoutingSettings& routing_settings);
 
-    void AddBus(const json::Dict& bus, transport_catalogue::TransportCatalogue& tc);
+    void AddBus(const json::Dict& bus,
+                transport_catalogue::TransportCatalogue& tc,
+                graph::DirectedWeightedGraph<double>& directed_graph,
+                RoutingSettings& routing_settings);
 
     void ProcessStatRequests(
         json::Node& requests_node,

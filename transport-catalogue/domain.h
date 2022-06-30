@@ -11,8 +11,10 @@ namespace transport_catalogue {
     struct Stop {
         std::string name;
         geo::Coordinates coords;
+        size_t in_vertex;
+        size_t out_vertex;
 
-        Stop(std::string& name, double lat, double lng);
+        Stop(std::string& name, double lat, double lng, size_t in_vertex);
     };
 
     class StopPointerPairHasher {

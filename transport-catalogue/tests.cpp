@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "geo.h"
+#include "graph.h"
 // #include "input_reader.h"
 #include "json_reader.h"
 #include "transport_catalogue.h"
@@ -16,7 +17,7 @@ namespace tests {
         ASSERT(tc.GetStops().empty());
         ASSERT(tc.GetStopnames().empty());
         std::string stop_name = "Test1";
-        Stop s {stop_name, 12.2, 76.8};
+        Stop s {stop_name, 12.2, 76.8, 0};
         tc.AddStop(s);
         ASSERT_EQUAL(tc.GetStops().size(), 1);
         ASSERT_EQUAL(tc.GetStops()[0].name, "Test1");
@@ -29,8 +30,8 @@ namespace tests {
         ASSERT(tc.GetBusnames().empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.2, 76.8};
-        Stop s2 {stop_name2, 14.2, 77.2};
+        Stop s1 {stop_name1, 12.2, 76.8, 0};
+        Stop s2 {stop_name2, 14.2, 77.2, 2};
         tc.AddStop(s1);
         tc.AddStop(s2);
         std::string bus_name = "Bus1";
@@ -54,7 +55,7 @@ namespace tests {
         ASSERT(tc.GetStopnames().empty());
         std::istringstream stream{R"({"type": "Stop","name": "Ривьерский мост","latitude": 43.587795,"longitude": 39.716901,"road_distances": {"Морской вокзал": 850}})"};
         const auto doc = json::Load(stream);
-        json_reader::AddStop(doc.GetRoot().AsMap(), tc);
+        json_reader::AddStop(doc.GetRoot().AsMap(), tc, 0);
         ASSERT_EQUAL(tc.GetStops().size(), 1);
         ASSERT_EQUAL(tc.GetStops()[0].name, "Ривьерский мост");
         ASSERT_EQUAL(tc.GetStopnames()["Ривьерский мост"]->name, "Ривьерский мост");
@@ -69,16 +70,20 @@ namespace tests {
         ASSERT(tc.GetDists()->empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.2, 76.8};
-        Stop s2 {stop_name2, 14.2, 77.2};
+        Stop s1 {stop_name1, 12.2, 76.8, 0};
+        Stop s2 {stop_name2, 14.2, 77.2, 2};
         tc.AddStop(s1);
         tc.AddStop(s2);
 
         std::istringstream stream{R"({"type": "Stop","name": "Test1","latitude": 43.587795,"longitude": 39.716901,"road_distances": {"Test2": 850}})"};
         const auto doc = json::Load(stream);
-        json_reader::AddDist(doc.GetRoot().AsMap(), tc);
+        graph::DirectedWeightedGraph<double> directed_graph(4);
+        json_reader::RoutingSettings rs{6, 40};
+        json_reader::AddDist(doc.GetRoot().AsMap(), tc, directed_graph, rs);
 
         ASSERT_EQUAL(tc.GetDists()->size(), 1);
+        ASSERT_EQUAL(directed_graph.GetVertexCount(), 4);
+        ASSERT_EQUAL(directed_graph.GetEdgeCount(), 1);
     }
 
     void InputAddBusOneWay() {
@@ -87,15 +92,17 @@ namespace tests {
         ASSERT(tc.GetBusnames().empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.201, 76.801};
-        Stop s2 {stop_name2, 12.202, 76.802};
+        Stop s1 {stop_name1, 12.201, 76.801, 0};
+        Stop s2 {stop_name2, 12.202, 76.802, 2};
         tc.AddStop(s1);
         tc.AddStop(s2);
         tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 200);
 
+        json_reader::RoutingSettings rs{6, 40};
+        graph::DirectedWeightedGraph<double> directed_graph(4);
         std::istringstream stream{R"({"type": "Bus","name": "Bus1","stops":["Test1", "Test2", "Test1"],"is_roundtrip": true})"};
         const auto doc = json::Load(stream);
-        json_reader::AddBus(doc.GetRoot().AsMap(), tc);
+        json_reader::AddBus(doc.GetRoot().AsMap(), tc, directed_graph, rs);
 
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
@@ -108,6 +115,7 @@ namespace tests {
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->first->name, "Test1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->last->name, "Test1");
         ASSERT(tc.GetBusnames()["Bus1"]->is_roundtrip);
+        ASSERT_EQUAL(directed_graph.GetEdgeCount(), 3);
     }
 
     void InputAddBusTwoWay() {
@@ -116,15 +124,17 @@ namespace tests {
         ASSERT(tc.GetBusnames().empty());
         std::string stop_name1 = "Test1";
         std::string stop_name2 = "Test2";
-        Stop s1 {stop_name1, 12.201, 76.801};
-        Stop s2 {stop_name2, 12.202, 76.802};
+        Stop s1 {stop_name1, 12.201, 76.801, 0};
+        Stop s2 {stop_name2, 12.202, 76.802, 2};
         tc.AddStop(s1);
         tc.AddStop(s2);
         tc.AddDistance(tc.StopByName("Test1"), tc.StopByName("Test2"), 200);
 
+        json_reader::RoutingSettings rs{6, 40};
+        graph::DirectedWeightedGraph<double> directed_graph(4);
         std::istringstream stream{R"({"type": "Bus","name": "Bus1","stops":["Test1", "Test2"],"is_roundtrip": false})"};
         const auto doc = json::Load(stream);
-        json_reader::AddBus(doc.GetRoot().AsMap(), tc);
+        json_reader::AddBus(doc.GetRoot().AsMap(), tc, directed_graph, rs);
 
         ASSERT_EQUAL(tc.GetBuses().size(), 1);
         ASSERT_EQUAL(tc.GetBuses()[0].name, "Bus1");
@@ -137,6 +147,7 @@ namespace tests {
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->first->name, "Test1");
         ASSERT_EQUAL(tc.GetBusnames()["Bus1"]->last->name, "Test2");
         ASSERT(!tc.GetBusnames()["Bus1"]->is_roundtrip);
+        ASSERT_EQUAL(directed_graph.GetEdgeCount(), 3);
     }
 
     void RunTests() {

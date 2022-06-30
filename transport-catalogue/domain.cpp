@@ -1,9 +1,11 @@
 #include "domain.h"
 
 namespace transport_catalogue {
-    Stop::Stop(std::string& name, double lat, double lng) :
+    Stop::Stop(std::string& name, double lat, double lng, size_t in_vertex) :
         name(name),
-        coords({lat, lng})
+        coords({lat, lng}),
+        in_vertex(in_vertex),
+        out_vertex(in_vertex + 1)
     {}
 
     size_t StopPointerPairHasher::operator()(const std::pair<Stop*, Stop*>& obj) const {
