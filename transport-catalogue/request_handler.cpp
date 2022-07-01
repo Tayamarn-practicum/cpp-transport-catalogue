@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <iostream>
+
 
 namespace request_handler {
     BusStat::BusStat(double curvature, double route_length, int stop_count, int unique_stop_count) :
@@ -11,9 +13,16 @@ namespace request_handler {
         unique_stop_count(unique_stop_count)
     {}
 
-    RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapRenderer& renderer) :
+    RequestHandler::RequestHandler(
+        const transport_catalogue::TransportCatalogue& db,
+        const map_renderer::MapRenderer& renderer,
+        const graph::DirectedWeightedGraph<double>& directed_graph,
+        const graph::Router<double>& router
+    ) :
         db_(db),
-        map_renderer_(renderer)
+        map_renderer_(renderer),
+        directed_graph_(directed_graph),
+        router_(router)
     {}
 
     std::optional<BusStat> RequestHandler::GetBusStat(const std::string_view& bus_name) const {
@@ -46,5 +55,32 @@ namespace request_handler {
             sstream
         );
         return sstream.str();
+    }
+
+    std::optional<graph::Router<double>::RouteInfo> RequestHandler::RouteInfo(const std::string_view from_stop_name, const std::string_view to_stop_name) const {
+        auto stopname_to_stop = db_.GetStopnames();
+        if (stopname_to_stop.find(from_stop_name) == stopname_to_stop.end()) {
+            return {};
+        }
+        if (stopname_to_stop.find(to_stop_name) == stopname_to_stop.end()) {
+            return {};
+        }
+        transport_catalogue::Stop* from_stop = stopname_to_stop.at(from_stop_name);
+        transport_catalogue::Stop* to_stop = stopname_to_stop.at(to_stop_name);
+        size_t start_vortex = from_stop->in_vertex;
+        size_t end_vortex = to_stop->in_vertex;
+        return router_.BuildRoute(start_vortex, end_vortex);
+    }
+
+    graph::Edge<double> RequestHandler::GraphEdgeInfo(graph::EdgeId edge_id) const {
+        return directed_graph_.GetEdge(edge_id);
+    }
+
+    transport_catalogue::Stop* RequestHandler::StopByVertex(size_t vertex_id) const {
+        return db_.GetVertexToStops()->at(vertex_id);
+    }
+
+    std::pair<transport_catalogue::Bus*, int> RequestHandler::BusSpanByEdge(size_t edge_id) const {
+        return db_.GetEdgeSpanToBuses()->at(edge_id);
     }
 }

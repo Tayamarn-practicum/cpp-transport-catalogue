@@ -18,25 +18,32 @@ namespace json_reader {
 
     void ProcessInput(std::istream& istream, std::ostream& ostream, transport_catalogue::TransportCatalogue& tc);
 
-    void ProcessBaseRequests(json::Node& requests, transport_catalogue::TransportCatalogue& tc, RoutingSettings& routing_settings);
+    graph::DirectedWeightedGraph<double> ProcessBaseRequests(
+        json::Node& requests,
+        transport_catalogue::TransportCatalogue& tc,
+        RoutingSettings& routing_settings
+    );
 
     void AddStop(const json::Dict& stop, transport_catalogue::TransportCatalogue& tc, size_t vertex_id);
 
     void AddDist(const json::Dict& stop,
                  transport_catalogue::TransportCatalogue& tc,
                  graph::DirectedWeightedGraph<double>& directed_graph,
-                 RoutingSettings& routing_settings);
+                 RoutingSettings& routing_settings
+    );
 
     void AddBus(const json::Dict& bus,
                 transport_catalogue::TransportCatalogue& tc,
                 graph::DirectedWeightedGraph<double>& directed_graph,
-                RoutingSettings& routing_settings);
+                RoutingSettings& routing_settings
+    );
 
     void ProcessStatRequests(
         json::Node& requests_node,
         transport_catalogue::TransportCatalogue& tc,
         map_renderer::MapSettings& settings,
-        std::ostream& ostream
+        std::ostream& ostream,
+        graph::DirectedWeightedGraph<double>& directed_graph
     );
 
     json::Node ProcessStatRequest(json::Node& request_node, request_handler::RequestHandler& handler);
@@ -46,6 +53,8 @@ namespace json_reader {
     void ProcessBusRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler);
 
     void ProcessMapRequest(json::Builder& responce_node, request_handler::RequestHandler& handler);
+
+    void ProcessRouteRequest(json::Dict& request_node, json::Builder& responce_node, request_handler::RequestHandler& handler);
 
     map_renderer::MapSettings ProcessRender(json::Node& requests_node);
 

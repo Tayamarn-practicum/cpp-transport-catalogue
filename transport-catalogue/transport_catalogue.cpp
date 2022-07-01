@@ -8,24 +8,32 @@
 namespace transport_catalogue {
     TransportCatalogue::TransportCatalogue() {}
 
-    void TransportCatalogue::AddStop(const Stop& stop) {
+    Stop* TransportCatalogue::AddStop(const Stop& stop) {
         stops_.push_back(stop);
         Stop* current_stop = &(stops_[stops_.size() - 1]);
         stopname_to_stop_[current_stop->name] = current_stop;
+        vertex_to_stop_[current_stop->in_vertex] = current_stop;
+        vertex_to_stop_[current_stop->out_vertex] = current_stop;
         stop_to_buses_[current_stop] = {};
+        return current_stop;
     }
 
-    void TransportCatalogue::AddBus(const Bus& bus) {
+    Bus* TransportCatalogue::AddBus(const Bus& bus) {
         buses_.push_back(bus);
         Bus* current_bus = &(buses_[buses_.size() - 1]);
         busname_to_bus_[current_bus->name] = current_bus;
         for (Stop* s : bus.stops) {
             stop_to_buses_.at(s).insert(current_bus);
         }
+        return current_bus;
     }
 
     void TransportCatalogue::AddDistance(Stop* s1, Stop* s2, int dist) {
         dist_between_stops_[{s1, s2}] = dist;
+    }
+
+    void TransportCatalogue::AddEdgeSpanToBus(size_t edge, Bus* bus, int span) {
+        edge_to_bus_and_span_[edge] = {bus, span};
     }
 
     std::deque<Stop> TransportCatalogue::GetStops() const {
@@ -71,5 +79,13 @@ namespace transport_catalogue {
 
     std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* TransportCatalogue::GetDists() {
         return &dist_between_stops_;
+    }
+
+    const std::unordered_map<size_t, Stop*>* TransportCatalogue::GetVertexToStops() const {
+        return &vertex_to_stop_;
+    }
+
+    const std::unordered_map<size_t, std::pair<Bus*, int>>* TransportCatalogue::GetEdgeSpanToBuses() const {
+        return &edge_to_bus_and_span_;
     }
 }

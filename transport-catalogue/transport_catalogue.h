@@ -14,11 +14,13 @@ namespace transport_catalogue {
     public:
         TransportCatalogue();
 
-        void AddStop(const Stop& stop);
+        Stop* AddStop(const Stop& stop);
 
-        void AddBus(const Bus& bus);
+        Bus* AddBus(const Bus& bus);
 
         void AddDistance(Stop* s1, Stop* s2, int dist);
+
+        void AddEdgeSpanToBus(size_t edge, Bus* bus, int span);
 
         std::deque<Stop> GetStops() const;
 
@@ -42,6 +44,10 @@ namespace transport_catalogue {
 
         std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher>* GetDists();
 
+        const std::unordered_map<size_t, Stop*>* GetVertexToStops() const;
+
+        const std::unordered_map<size_t, std::pair<Bus*, int>>* GetEdgeSpanToBuses() const;
+
     private:
         std::deque<Stop> stops_;
         std::map<std::string_view, Stop*> stopname_to_stop_;
@@ -49,5 +55,7 @@ namespace transport_catalogue {
         std::map<std::string_view, Bus*> busname_to_bus_;
         std::unordered_map<Stop*, std::unordered_set<Bus*>> stop_to_buses_;
         std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher> dist_between_stops_;
+        std::unordered_map<size_t, Stop*> vertex_to_stop_;
+        std::unordered_map<size_t, std::pair<Bus*, int>> edge_to_bus_and_span_;
     };
 }

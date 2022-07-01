@@ -7,7 +7,9 @@
 #include <string>
 #include <unordered_set>
 
+#include "graph.h"
 #include "map_renderer.h"
+#include "router.h"
 #include "transport_catalogue.h"
 
 namespace request_handler {
@@ -23,7 +25,12 @@ namespace request_handler {
 
     class RequestHandler {
     public:
-        RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapRenderer& renderer);
+        RequestHandler(
+            const transport_catalogue::TransportCatalogue& db,
+            const map_renderer::MapRenderer& renderer,
+            const graph::DirectedWeightedGraph<double>& directed_graph,
+            const graph::Router<double>& router
+        );
 
         // Возвращает информацию о маршруте (запрос Bus)
         std::optional<BusStat> GetBusStat(const std::string_view& bus_name) const;
@@ -33,8 +40,15 @@ namespace request_handler {
 
         std::string RenderMap() const;
 
+        std::optional<graph::Router<double>::RouteInfo> RouteInfo(const std::string_view from_stop_name, const std::string_view to_stop_name) const;
+        graph::Edge<double> GraphEdgeInfo(graph::EdgeId edge_id) const;
+        transport_catalogue::Stop* StopByVertex(size_t vertex_id) const;
+        std::pair<transport_catalogue::Bus*, int> BusSpanByEdge(size_t edge_id) const;
+
     private:
         const transport_catalogue::TransportCatalogue& db_;
         const map_renderer::MapRenderer& map_renderer_;
+        const graph::DirectedWeightedGraph<double>& directed_graph_;
+        const graph::Router<double>& router_;
     };
 }
